@@ -176,6 +176,28 @@
         }
 
         async function submitAbsence(type) {
+
+            // 1. Cek isi session di localStorage
+            const sessionData = localStorage.getItem('userSession');
+            console.log("Data Session di LocalStorage:", sessionData); // Cek di F12 apakah ini ada isinya?
+            
+            if (!sessionData) {
+                alert("Sesi habis atau Anda belum login. Silakan login kembali.");
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const session = JSON.parse(sessionData);
+            
+            // 2. Pastikan nama propertinya benar. 
+            // Jika di index.html kamu menyimpannya sebagai 'employee_id', maka ganti di sini.
+            const employeeNumber = session.empl_number || session.EMPL_NMBR || session.id; 
+            
+            if (!employeeNumber) {
+                alert("Data Karyawan (EMPL_NMBR) tidak ditemukan dalam sesi. Silakan Login ulang.");
+                return;
+            }
+            
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const sessionData = localStorage.getItem('userSession');
@@ -210,7 +232,7 @@
         
             // 2. PAYLOAD (Sesuaikan nama kolom dengan akhiran X)
             const payload = {
-                EMPL_NMBR: session.empl_number,
+                EMPL_NMBR: employeeNumber,    //session.empl_number,
                 KORX_NAME: session.username, 
                 TRAN_DATE: now.toISOString().split('T')[0],
                 TRAN_TIME: timeStr, // Format HH:mm:ss
@@ -237,59 +259,7 @@
             }
         }
         
-        async function submitAbsenceXX(type) {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const sessionData = localStorage.getItem('userSession');
-
-            // MENJADI INI (Format Standar Database):
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                now.getMinutes().toString().padStart(2, '0') + ':' + 
-                now.getSeconds().toString().padStart(2, '0');
-            
-            if (!sessionData) return alert("Sesi habis, login ulang.");
-            const session = JSON.parse(sessionData);
-
-            const ctx = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
-
-            // Watermark stempel waktu & lokasi
-            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-            ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
-            ctx.fillStyle = "white";
-            ctx.font = "bold 20px Inter";
-            ctx.fillText(`STATUS: ${type.toUpperCase()}`, 20, canvas.height - 85);
-            ctx.font = "16px Inter";
-            ctx.fillText(`GPS: ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`, 20, canvas.height - 58);
-            ctx.fillText(`RADIUS: ${currentDist.toFixed(1)}m | ${new Date().toLocaleString()}`, 20, canvas.height - 30);
-
-            document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
-            document.getElementById('photo-preview').style.display = 'block';
-            document.getElementById('camera-container').style.display = 'none';
-    
-            const payload = {
-                EMPL_NMBR: session.empl_number,
-                KORX_NAME: session.username, 
-                TRAN_DATE: new Date().toISOString().split('T')[0],
-                TRAN_TIME: timeStr,    //new Date().toLocaleTimeString('id-ID'),
-                TRAN_STAT: type,
-                LANG_GPSX: userCoords.lng,
-                LATT_GPSX: userCoords.lat,
-                RADS_GPSX: Math.round(currentDist),
-                DEVC_NAME: navigator.userAgent
-            };
-
-            const { error } = await supabaseClient.from('TH_ATTN01').insert([payload]);
-            if (error) {
-                alert("Gagal Simpan ke Database: " + error.message);
-            } else {
-                alert("Absensi Berhasil Disimpan!");
-                window.location.href = 'dashboard.html';
-            }
-        }
+        
 
         document.getElementById('btn-checkin').addEventListener('click', () => submitAbsence('Check In'));
         document.getElementById('btn-checkout').addEventListener('click', () => submitAbsence('Check Out'));
