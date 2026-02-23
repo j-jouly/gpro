@@ -179,6 +179,68 @@
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const sessionData = localStorage.getItem('userSession');
+            
+            if (!sessionData) return alert("Sesi habis, login ulang.");
+            const session = JSON.parse(sessionData);
+        
+            // 1. FORMAT JAM (Ganti titik jadi titik dua)
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                            now.getMinutes().toString().padStart(2, '0') + ':' + 
+                            now.getSeconds().toString().padStart(2, '0');
+        
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+        
+            // Watermark
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 20px Inter";
+            ctx.fillText(`STATUS: ${type.toUpperCase()}`, 20, canvas.height - 85);
+            ctx.font = "16px Inter";
+            ctx.fillText(`GPS: ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`, 20, canvas.height - 58);
+            ctx.fillText(`RADIUS: ${currentDist.toFixed(1)}m | ${new Date().toLocaleDateString()} ${timeStr}`, 20, canvas.height - 30);
+        
+            document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
+            document.getElementById('photo-preview').style.display = 'block';
+            document.getElementById('camera-container').style.display = 'none';
+        
+            // 2. PAYLOAD (Sesuaikan nama kolom dengan akhiran X)
+            const payload = {
+                EMPL_NMBR: session.empl_number,
+                KORX_NAME: session.username, 
+                TRAN_DATE: now.toISOString().split('T')[0],
+                TRAN_TIME: timeStr, // Format HH:mm:ss
+                TRAN_STAT: type,
+                LANG_GPSX: userCoords.lng, // Tambahkan X jika memang di database ada X
+                LATT_GPSX: userCoords.lat, // Tambahkan X
+                RADS_GPSX: Math.round(currentDist), // Tambahkan X
+                DEVC_NAME: navigator.userAgent
+            };
+        
+            console.log("Mengirim data:", payload); // Cek di console F12
+        
+            try {
+                const { error } = await supabaseClient.from('TH_ATTN01').insert([payload]);
+                if (error) {
+                    alert("Gagal Simpan ke Database: " + error.message);
+                    console.error(error);
+                } else {
+                    alert("Absensi Berhasil Disimpan!");
+                    window.location.href = 'dashboard.html';
+                }
+            } catch (err) {
+                alert("Terjadi kesalahan sistem: " + err.message);
+            }
+        }
+        
+        async function submitAbsenceXX(type) {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const sessionData = localStorage.getItem('userSession');
 
             // MENJADI INI (Format Standar Database):
             const now = new Date();
