@@ -84,10 +84,10 @@
     </div>
 
     <script>
-        // --- 1. CONFIG ---
+        // --- 1. CONFIG (FIXED VARIABLES) ---
         const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
-        const supabaseClient = supabase.createClient(_supabaseUrl, _supabaseKey);
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Gunakan key lengkap Anda
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const LOCATIONS = {
             outlet: { lat: -7.4665628, lng: 112.4461021, radius: 70 },
@@ -101,7 +101,7 @@
 
         // --- 2. FUNGSI JARAK ---
         function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // meter
+            const R = 6371e3; 
             const p1 = lat1 * Math.PI/180;
             const p2 = lat2 * Math.PI/180;
             const dp = (lat2-lat1) * Math.PI/180;
@@ -110,7 +110,7 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        // --- 3. EVENT LISTENER TOMBOL CEK LOKASI ---
+        // --- 3. EVENT LISTENER ---
         document.getElementById('btn-check-location').addEventListener('click', function() {
             const locKey = document.getElementById('location-select').value;
             const locStatus = document.getElementById('location-status');
@@ -157,7 +157,6 @@
             }
         });
 
-        // --- 4. LOGIKA KAMERA ---
         async function startCamera() {
             const video = document.getElementById('video');
             try {
@@ -167,7 +166,7 @@
                 });
                 video.srcObject = stream;
             } catch (e) { 
-                alert('Kamera Gagal: ' + e.name + " - " + e.message + "\nPastikan menggunakan HTTPS."); 
+                alert('Kamera Gagal. Pastikan Anda memberikan izin kamera.'); 
             }
         }
 
@@ -176,20 +175,20 @@
             document.getElementById('camera-container').style.display = 'block';
         }
 
-        // --- 5. LOGIKA ABSENSI ---
         async function submitAbsence(type) {
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
-            const session = JSON.parse(localStorage.getItem('userSession'));
+            const sessionData = localStorage.getItem('userSession');
             
-            if (!session) return alert("Sesi habis, login ulang.");
+            if (!sessionData) return alert("Sesi habis, login ulang.");
+            const session = JSON.parse(sessionData);
 
             const ctx = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0);
 
-            // Watermark
+            // Watermark stempel waktu & lokasi
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
             ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
             ctx.fillStyle = "white";
@@ -199,12 +198,10 @@
             ctx.fillText(`GPS: ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`, 20, canvas.height - 58);
             ctx.fillText(`RADIUS: ${currentDist.toFixed(1)}m | ${new Date().toLocaleString()}`, 20, canvas.height - 30);
 
-            // Preview UI
             document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
             document.getElementById('photo-preview').style.display = 'block';
             document.getElementById('camera-container').style.display = 'none';
 
-            // Kirim ke Database
             const payload = {
                 EMPL_NMBR: session.empl_number,
                 KORX_NAME: session.username, 
@@ -218,9 +215,10 @@
             };
 
             const { error } = await supabaseClient.from('TH_ATTN01').insert([payload]);
-            if (error) alert("Gagal Simpan: " + error.message);
-            else {
-                alert("Absensi Berhasil!");
+            if (error) {
+                alert("Gagal Simpan ke Database: " + error.message);
+            } else {
+                alert("Absensi Berhasil Disimpan!");
                 window.location.href = 'dashboard.html';
             }
         }
