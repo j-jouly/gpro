@@ -208,9 +208,9 @@
                 TRAN_DATE: new Date().toISOString().split('T')[0],
                 TRAN_TIME: new Date().toLocaleTimeString('id-ID'),
                 TRAN_STAT: type,
-                LANG_GPS: userCoords.lng,
-                LATT_GPS: userCoords.lat,
-                RADS_GPS: Math.round(currentDist),
+                LANG_GPSX: userCoords.lng,
+                LATT_GPSX: userCoords.lat,
+                RADS_GPSX: Math.round(currentDist),
                 DEVC_NAME: navigator.userAgent
             };
 
