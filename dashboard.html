@@ -3,144 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sistem Karyawan</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"> <style>
-        /* Tambahan style khusus Dashboard agar tidak merusak style.css yang lama */
-        .dashboard-container {
-            width: 100%;
-            max-width: 1000px;
+    <title>Dashboard | Sistem Karyawan</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --purple: #7e22ce;
+            --orange: #ea580c;
+            --bg: #f1f5f9;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-dark);
+            min-height: 100vh;
             padding: 20px;
         }
-        .header-card {
-            background: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-light);
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Header Section --- */
+        .header {
+            background: var(--white);
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
-        .welcome-msg h2 {
-            margin: 0;
-            color: var(--secondary-color);
+
+        .welcome-text h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
         }
-        .welcome-msg p {
-            margin: 5px 0 0 0;
-            color: #666;
+
+        .welcome-text p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
         }
+
         .btn-logout {
-            background: #ef4444; /* Warna merah */
-            color: white;
+            background: #fee2e2;
+            color: var(--danger);
             border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 10px 18px;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
         .btn-logout:hover {
-            background: #dc2626;
+            background: var(--danger);
+            color: white;
         }
+
+        /* --- Grid Section --- */
         .content-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
         }
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-light);
-            border-left: 5px solid var(--primary-color);
-            cursor: pointer; /* Menandakan bisa diklik */
-            transition: transform 0.2s, box-shadow 0.2s; /* Efek halus */
+
+        .menu-card {
+            background: var(--white);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            border-color: var(--primary);
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .menu-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .menu-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* --- Variasi Warna --- */
+        .card-profile::before { background: var(--primary); }
+        .card-attendance::before { background: var(--danger); }
+        .card-reports::before { background: var(--info); }
+        .card-master::before { background: var(--orange); }
+        .card-leave::before { background: var(--purple); }
+        .card-overtime::before { background: var(--warning); }
+
+        .icon-profile { background: #dbeafe; color: var(--primary); }
+        .icon-attendance { background: #fee2e2; color: var(--danger); }
+        .icon-reports { background: #e0f2fe; color: var(--info); }
+        .icon-master { background: #ffedd5; color: var(--orange); }
+        .icon-leave { background: #f3e8ff; color: var(--purple); }
+        .icon-overtime { background: #fef3c7; color: var(--warning); }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
             }
-        
-        .stat-card:hover {
-            transform: translateY(-5px); /* Kartu sedikit naik saat hover */
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            .welcome-text h2 { font-size: 20px; }
         }
-    
-        .stat-card h3 {
-            margin-top: 0;
-            font-size: 1.2em;
-            color: var(--secondary-color);
-        }
-        
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <div class="header-card">
-            <div class="welcome-msg">
+    <div class="container">
+        <header class="header">
+            <div class="welcome-text">
                 <h2 id="userNameDisplay">Halo, Pengguna!</h2>
-                <p>Selamat datang kembali di sistem internal.</p>
+                <p>Apa yang ingin Anda kerjakan hari ini?</p>
             </div>
-            <button class="btn-logout" onclick="logout()">🚪 Keluar</button>
-        </div>
+            <button class="btn-logout" onclick="logout()">
+                <span>Logout</span>
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
+        </header>
 
-    <div class="content-grid">
-        <div class="stat-card" onclick="location.href='profile.html'">
-            <h3>🧔 Profil Saya</h3>
-            <p>Lihat dan ubah informasi data diri Anda.</p>
-        </div>
-    
-        <div class="stat-card" style="border-left-color: #dc2626;" onclick="location.href='attendance.html'">
-            <h3>⏰ Kehadiran</h3>
-            <p>Catat absensi harian Anda di sini.</p>
-        </div>
-        
-        <div class="stat-card" style="border-left-color: #3b82f6;" onclick="location.href='reports.html'">
-            <h3>📝 Laporan</h3>
-            <p>Akses dokumen dan laporan bulanan.</p>
-        </div>
-        
-        <div class="stat-card" style="border-left-color: #ea580c;" onclick="location.href='master.html'">
-            <h3>🖥️ Master</h3>
-            <p>Employee Master.</p>
-        </div>
-        
-        <div class="stat-card" style="border-left-color: #7e22ce;" onclick="location.href='leave.html'">
-            <h3>🏖️ Leave</h3>
-            <p>Annual Leave.</p>
-        </div>
-        
-        <div class="stat-card" style="border-left-color: #f59e0b;" onclick="location.href='overtime.html'">
-            <h3>💰 Overtime</h3>
-            <p>Overtime Disapproval.</p>
+        <div class="content-grid">
+            
+            <div class="menu-card card-profile" onclick="location.href='profile.html'">
+                <div class="icon-box icon-profile">🧔</div>
+                <h3>Profil Saya</h3>
+                <p>Kelola data personal, ubah foto profil, dan informasi kontak Anda.</p>
+            </div>
+
+            <div class="menu-card card-attendance" onclick="location.href='attendance.html'">
+                <div class="icon-box icon-attendance">⏰</div>
+                <h3>Kehadiran</h3>
+                <p>Lakukan absensi masuk/pulang dan pantau riwayat kehadiran harian.</p>
+            </div>
+
+            <div class="menu-card card-reports" onclick="location.href='reports.html'">
+                <div class="icon-box icon-reports">📝</div>
+                <h3>Laporan</h3>
+                <p>Lihat slip gaji, laporan kinerja, dan dokumen administrasi lainnya.</p>
+            </div>
+
+            <div class="menu-card card-master" onclick="location.href='master.html'">
+                <div class="icon-box icon-master">🖥️</div>
+                <h3>Master Data</h3>
+                <p>Manajemen data master karyawan dan struktur organisasi perusahaan.</p>
+            </div>
+
+            <div class="menu-card card-leave" onclick="location.href='leave.html'">
+                <div class="icon-box icon-leave">🏖️</div>
+                <h3>Pengajuan Cuti</h3>
+                <p>Ajukan cuti tahunan, izin sakit, atau keperluan mendesak dengan mudah.</p>
+            </div>
+
+            <div class="menu-card card-overtime" onclick="location.href='overtime.html'">
+                <div class="icon-box icon-overtime">💰</div>
+                <h3>Lembur (OT)</h3>
+                <p>Persetujuan lembur, perhitungan insentif, dan rekap jam kerja tambahan.</p>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // 1. Proteksi Halaman: Cek apakah user sudah login
+        // 1. Protection Logic
         const sessionData = localStorage.getItem('userSession');
         
         if (!sessionData) {
-            // Jika tidak ada data session, tendang balik ke login
-            alert('Akses ditolak! Silakan login terlebih dahulu.');
             window.location.href = 'index.html';
         } else {
-            // Jika ada, tampilkan nama usernya
             const user = JSON.parse(sessionData);
-            document.getElementById('userNameDisplay').innerText = `Halo, ${user.username}!`;
+            // Menampilkan username dengan format yang rapi
+            document.getElementById('userNameDisplay').innerText = `Selamat Datang, ${user.username}!`;
         }
 
-        // 2. Fungsi Logout
+        // 2. Logout Logic with Sweet Confirmation
         function logout() {
-            if (confirm('Apakah Anda yakin ingin keluar?')) {
-                localStorage.removeItem('userSession'); // Hapus data login
-                window.location.href = 'index.html';   // Kembali ke login
+            if (confirm('Anda yakin ingin mengakhiri sesi ini?')) {
+                localStorage.removeItem('userSession');
+                window.location.href = 'index.html';
             }
         }
     </script>
 </body>
-
 </html>
-
-
-
-
-
