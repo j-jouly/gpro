@@ -3,110 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistem Karyawan</title>
+    <title>Portal Sistem Karyawan | Login</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .logo-wrapper {
+            margin-bottom: 24px;
+        }
+
+        .logo-wrapper img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            margin-left: 4px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.1s ease;
+            margin-top: 10px;
+        }
+
+        .login-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .login-button:active {
+            transform: scale(0.98);
+        }
+
+        .login-button:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        #messageBox {
+            margin-bottom: 20px;
+            font-size: 13px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .social-login {
+            margin-top: 32px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 24px;
+        }
+
+        .social-login p {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .social-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .social-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .social-button:hover {
+            background: #f8fafc;
+        }
+
+        .social-button img {
+            width: 18px;
+        }
+
+        .signup-link {
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .signup-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Loader Animation */
+        .loader {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+    </style>
 </head>
 <body>
+
     <div class="login-container">
         <div class="login-card">
             <div class="logo-wrapper">
-                <img src="DII.png" alt="Logo" onerror="this.src='https://via.placeholder.com/80?text=Logo'">
+                <img src="DII.png" alt="Logo Perusahaan" onerror="this.src='https://via.placeholder.com/120x60?text=LOGO'">
             </div>
             
-            <h1 class="login-title">Selamat Datang</h1>
-            <p class="login-subtitle">Masuk ke akun Anda untuk melanjutkan</p>
-    
+            <h1 class="login-title">Portal Karyawan</h1>
+            <p class="login-subtitle">Silakan masuk untuk mengakses dashboard</p>
+            
+            <div id="messageBox"></div>
+
             <form id="loginForm">
                 <div class="input-group">
                     <label for="email">Username / Email</label>
-                    <input type="text" id="email" placeholder="Masukkan username" required autocomplete="username">
+                    <input type="text" id="email" placeholder="Contoh: budi.santoso" required autocomplete="username">
                 </div>
                 <div class="input-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
                 </div>
                 
-                <div id="messageBox" style="display: none; margin-bottom: 15px; font-size: 14px; padding: 10px; border-radius: 5px;"></div>
-
                 <button type="submit" id="btnLogin" class="login-button">
-                    <span class="btn-text">🔑 Masuk</span>
+                    <span id="btnText">Masuk ke Sistem</span>
                 </button>
             </form>
 
-            <p class="signup-link">Belum punya akun? <a href="#">Daftar Sekarang</a></p>
-            
             <div class="social-login">
-                <p> - OR - </p>
+                <p>Atau masuk dengan</p>
                 <div class="social-buttons">
-                    <button type="button" class="social-button google" onclick="handleSocialLogin('google')">
-                        <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google icon"/> Google
+                    <button type="button" class="social-button" onclick="handleSocialLogin('google')">
+                        <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google"/>
+                        Google
                     </button>
-                    <button type="button" class="social-button github" onclick="handleSocialLogin('github')">
-                        <img src="https://img.icons8.com/ios-glyphs/16/ffffff/github.png" alt="GitHub icon"/> GitHub
+                    <button type="button" class="social-button" onclick="handleSocialLogin('github')">
+                        <img src="https://img.icons8.com/ios-filled/50/000000/github.png" alt="GitHub"/>
+                        GitHub
                     </button>
                 </div>
             </div>
+
+            <p class="signup-link">Masalah login? <a href="#">Hubungi IT Support</a></p>
         </div>
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
+        // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- 2. ELEMENTS ---
         const loginForm = document.getElementById('loginForm');
         const btnLogin = document.getElementById('btnLogin');
+        const btnText = document.getElementById('btnText');
         const messageBox = document.getElementById('messageBox');
 
-        // --- 3. HELPER FUNCTIONS ---
         function showMessage(msg, type = 'error') {
             messageBox.textContent = msg;
             messageBox.style.display = 'block';
-            messageBox.style.backgroundColor = type === 'error' ? '#fee2e2' : '#dcfce7';
-            messageBox.style.color = type === 'error' ? '#991b1b' : '#166534';
+            if (type === 'error') {
+                messageBox.style.backgroundColor = '#fee2e2';
+                messageBox.style.color = '#991b1b';
+                messageBox.style.border = '1px solid #fecaca';
+            } else {
+                messageBox.style.backgroundColor = '#dcfce7';
+                messageBox.style.color = '#166534';
+                messageBox.style.border = '1px solid #bbf7d0';
+            }
         }
 
-        // --- 4. LOGIN LOGIC ---
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // UI State: Loading
             btnLogin.disabled = true;
-            btnLogin.innerHTML = '<span class="loader">Memproses...</span>';
-            showMessage('Mengecek data...', 'success');
+            btnText.innerHTML = 'Memproses...';
+            messageBox.style.display = 'none';
 
             const usernameInput = document.getElementById('email').value;
             const passwordInput = document.getElementById('password').value;
 
             try {
-                // Query ke tabel TH_EMP01M
                 const { data, error } = await supabaseClient
                     .from('TH_EMP01M')
-                    .select('EMPL_UNME, EMPL_PSWD') // Hanya ambil kolom yang perlu
+                    .select('EMPL_UNME, EMPL_PSWD')
                     .eq('EMPL_UNME', usernameInput)
                     .eq('EMPL_PSWD', passwordInput)
                     .single();
 
                 if (error || !data) {
-                    throw new Error('Username atau Password salah.');
+                    throw new Error('Username atau Password tidak ditemukan.');
                 }
 
-                // JIKA BERHASIL
                 showMessage('Login Berhasil! Mengalihkan...', 'success');
                 
-                // Simpan session sederhana (opsional untuk skala kecil)
                 localStorage.setItem('userSession', JSON.stringify({
                     username: data.EMPL_UNME,
                     loginTime: new Date().getTime()
                 }));
 
-                // Redirect ke Dashboard (Ganti URL-nya)
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 1500);
@@ -114,11 +317,10 @@
             } catch (err) {
                 showMessage(err.message, 'error');
                 btnLogin.disabled = false;
-                btnLogin.innerHTML = '🔑 Masuk';
+                btnText.innerHTML = 'Masuk ke Sistem';
             }
         });
 
-        // --- 5. SOCIAL LOGIN (Supabase Auth) ---
         async function handleSocialLogin(provider) {
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: provider,
@@ -129,4 +331,3 @@
     </script>
 </body>
 </html>
-
