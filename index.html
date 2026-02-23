@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistem Karyawan</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-wrapper">
+                <img src="DII.png" alt="Logo" onerror="this.src='https://via.placeholder.com/80?text=Logo'">
+            </div>
+            
+            <h1 class="login-title">Selamat Datang</h1>
+            <p class="login-subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+    
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">Username / Email</label>
+                    <input type="text" id="email" placeholder="Masukkan username" required autocomplete="username">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                
+                <div id="messageBox" style="display: none; margin-bottom: 15px; font-size: 14px; padding: 10px; border-radius: 5px;"></div>
+
+                <button type="submit" id="btnLogin" class="login-button">
+                    <span class="btn-text">🔑 Masuk</span>
+                </button>
+            </form>
+
+            <p class="signup-link">Belum punya akun? <a href="#">Daftar Sekarang</a></p>
+            
+            <div class="social-login">
+                <p> - OR - </p>
+                <div class="social-buttons">
+                    <button type="button" class="social-button google" onclick="handleSocialLogin('google')">
+                        <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google icon"/> Google
+                    </button>
+                    <button type="button" class="social-button github" onclick="handleSocialLogin('github')">
+                        <img src="https://img.icons8.com/ios-glyphs/16/ffffff/github.png" alt="GitHub icon"/> GitHub
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- 2. ELEMENTS ---
+        const loginForm = document.getElementById('loginForm');
+        const btnLogin = document.getElementById('btnLogin');
+        const messageBox = document.getElementById('messageBox');
+
+        // --- 3. HELPER FUNCTIONS ---
+        function showMessage(msg, type = 'error') {
+            messageBox.textContent = msg;
+            messageBox.style.display = 'block';
+            messageBox.style.backgroundColor = type === 'error' ? '#fee2e2' : '#dcfce7';
+            messageBox.style.color = type === 'error' ? '#991b1b' : '#166534';
+        }
+
+        // --- 4. LOGIN LOGIC ---
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // UI State: Loading
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<span class="loader">Memproses...</span>';
+            showMessage('Mengecek data...', 'success');
+
+            const usernameInput = document.getElementById('email').value;
+            const passwordInput = document.getElementById('password').value;
+
+            try {
+                // Query ke tabel TH_EMP01M
+                const { data, error } = await supabaseClient
+                    .from('TH_EMP01M')
+                    .select('EMPL_UNME, EMPL_PSWD') // Hanya ambil kolom yang perlu
+                    .eq('EMPL_UNME', usernameInput)
+                    .eq('EMPL_PSWD', passwordInput)
+                    .single();
+
+                if (error || !data) {
+                    throw new Error('Username atau Password salah.');
+                }
+
+                // JIKA BERHASIL
+                showMessage('Login Berhasil! Mengalihkan...', 'success');
+                
+                // Simpan session sederhana (opsional untuk skala kecil)
+                localStorage.setItem('userSession', JSON.stringify({
+                    username: data.EMPL_UNME,
+                    loginTime: new Date().getTime()
+                }));
+
+                // Redirect ke Dashboard (Ganti URL-nya)
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (err) {
+                showMessage(err.message, 'error');
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '🔑 Masuk';
+            }
+        });
+
+        // --- 5. SOCIAL LOGIN (Supabase Auth) ---
+        async function handleSocialLogin(provider) {
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: provider,
+                options: { redirectTo: window.location.origin }
+            });
+            if (error) showMessage('Gagal login dengan ' + provider, 'error');
+        }
+    </script>
+</body>
+</html>
+
