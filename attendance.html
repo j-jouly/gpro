@@ -179,6 +179,12 @@
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const sessionData = localStorage.getItem('userSession');
+
+            // MENJADI INI (Format Standar Database):
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                now.getMinutes().toString().padStart(2, '0') + ':' + 
+                now.getSeconds().toString().padStart(2, '0');
             
             if (!sessionData) return alert("Sesi habis, login ulang.");
             const session = JSON.parse(sessionData);
@@ -201,12 +207,12 @@
             document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
             document.getElementById('photo-preview').style.display = 'block';
             document.getElementById('camera-container').style.display = 'none';
-
+    
             const payload = {
                 EMPL_NMBR: session.empl_number,
                 KORX_NAME: session.username, 
                 TRAN_DATE: new Date().toISOString().split('T')[0],
-                TRAN_TIME: new Date().toLocaleTimeString('id-ID'),
+                TRAN_TIME: timeStr,    //new Date().toLocaleTimeString('id-ID'),
                 TRAN_STAT: type,
                 LANG_GPSX: userCoords.lng,
                 LATT_GPSX: userCoords.lat,
