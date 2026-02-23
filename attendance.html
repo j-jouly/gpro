@@ -94,14 +94,10 @@
 
     <script>
         // --- CONFIGURATION ---
-        //const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
-        //const SUPABASE_KEY = 'YOUR_SUPABASE_KEY_HERE'; // GANTI DENGAN KEY KAMU
-        //const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
         const supabaseClient = supabase.createClient(_supabaseUrl, _supabaseKey);
-        
+
         const LOCATIONS = {
             outlet: { lat: -7.4665628, lng: 112.4461021, radius: 70 },
             ck: { lat: -7.487560, lng: 112.429730, radius: 70 },
@@ -110,13 +106,13 @@
 
         let userCoords = { lat: 0, lng: 0 };
         let selectedLoc = null;
+        let currentDist = 0;
 
         const btnCheckLoc = document.getElementById('btn-check-location');
         const locStatus = document.getElementById('location-status');
         const cameraCard = document.getElementById('camera-card');
         const video = document.getElementById('video');
 
-        // Haversine Calculation
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3;
             const p1 = lat1 * Math.PI/180;
@@ -139,22 +135,22 @@
             navigator.geolocation.getCurrentPosition((pos) => {
                 userCoords.lat = pos.coords.latitude;
                 userCoords.lng = pos.coords.longitude;
-                const dist = getDistance(userCoords.lat, userCoords.lng, selectedLoc.lat, selectedLoc.lng);
+                currentDist = getDistance(userCoords.lat, userCoords.lng, selectedLoc.lat, selectedLoc.lng);
                 
                 document.getElementById('coords').style.display = 'block';
                 document.getElementById('coords').textContent = `Koordinat: ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`;
 
-                if (dist <= selectedLoc.radius) {
+                if (currentDist <= selectedLoc.radius) {
                     locStatus.className = 'status-box status-success';
-                    locStatus.innerHTML = `✅ <b>Lokasi Sesuai!</b> (Jarak: ${dist.toFixed(1)}m)`;
+                    locStatus.innerHTML = `✅ <b>Lokasi Sesuai!</b> (Jarak: ${currentDist.toFixed(1)}m)`;
                     startCamera();
                     cameraCard.style.display = 'block';
                 } else {
                     locStatus.className = 'status-box status-error';
-                    locStatus.innerHTML = `❌ <b>Terlalu Jauh!</b> (Jarak: ${dist.toFixed(1)}m, Maks: ${selectedLoc.radius}m)`;
+                    locStatus.innerHTML = `❌ <b>Terlalu Jauh!</b> (Jarak: ${currentDist.toFixed(1)}m, Maks: ${selectedLoc.radius}m)`;
                     cameraCard.style.display = 'none';
                 }
-            }, (err) => alert('Gagal akses GPS. Pastikan izin lokasi aktif.'), { enableHighAccuracy: true });
+            }, (err) => alert('Gagal akses GPS.'), { enableHighAccuracy: true });
         });
 
         async function startCamera() {
@@ -177,31 +173,33 @@
             const ctx = canvas.getContext('2d');
             const now = new Date();
             const dateStr = now.toLocaleDateString('id-ID');
-            const timeStr = now.toLocaleTimeString('id-ID');
+            const timeStr = now.toLocaleTimeString('id-ID', { hour12: false });
 
-            // 1. Capture & Watermark
+            // 1. Capture Foto & Gambar Watermark
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0);
 
-            // Overlay Background Teks
+            // Overlay Gelap di bawah agar teks terbaca
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-            ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+            ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
 
-            // Text Remark
+            // Tambahkan Teks Watermark
             ctx.fillStyle = "white";
-            ctx.font = "bold 20px Inter, Arial";
-            ctx.fillText(`STATUS: ${type}`, 20, canvas.height - 70);
-            ctx.font = "16px Inter, Arial";
-            ctx.fillText(`GPS: ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`, 20, canvas.height - 45);
-            ctx.fillText(`WAKTU: ${dateStr} ${timeStr}`, 20, canvas.height - 20);
+            ctx.font = "bold 22px Inter, Arial";
+            ctx.fillText(`STATUS: ${type.toUpperCase()}`, 20, canvas.height - 85);
+            
+            ctx.font = "18px Inter, Arial";
+            ctx.fillText(`GPS: ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`, 20, canvas.height - 58);
+            ctx.fillText(`RADIUS: ${currentDist.toFixed(1)} meter`, 20, canvas.height - 35);
+            ctx.fillText(`WAKTU: ${dateStr} ${timeStr}`, 20, canvas.height - 12);
 
-            // Preview UI
+            // Preview Foto
             document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
             document.getElementById('photo-preview').style.display = 'block';
             document.getElementById('camera-container').style.display = 'none';
 
-            // 2. Simpan ke Database
+            // 2. Simpan ke Supabase
             const payload = {
                 EMPL_NMBR: session.empl_number,
                 KORX_NAME: session.username, 
@@ -210,7 +208,7 @@
                 TRAN_STAT: type,
                 LANG_GPS: userCoords.lng,
                 LATT_GPS: userCoords.lat,
-                RADS_GPS: Math.round(getDistance(userCoords.lat, userCoords.lng, selectedLoc.lat, selectedLoc.lng)),
+                RADS_GPS: Math.round(currentDist),
                 DEVC_NAME: navigator.userAgent
             };
 
