@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistem Karyawan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> <style>
+        /* Tambahan style khusus Dashboard agar tidak merusak style.css yang lama */
+        .dashboard-container {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+        }
+        .header-card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .welcome-msg h2 {
+            margin: 0;
+            color: var(--secondary-color);
+        }
+        .welcome-msg p {
+            margin: 5px 0 0 0;
+            color: #666;
+        }
+        .btn-logout {
+            background: #ef4444; /* Warna merah */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-logout:hover {
+            background: #dc2626;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            border-left: 5px solid var(--primary-color);
+            cursor: pointer; /* Menandakan bisa diklik */
+            transition: transform 0.2s, box-shadow 0.2s; /* Efek halus */
+            }
+        
+        .stat-card:hover {
+            transform: translateY(-5px); /* Kartu sedikit naik saat hover */
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+    
+        .stat-card h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: var(--secondary-color);
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="header-card">
+            <div class="welcome-msg">
+                <h2 id="userNameDisplay">Halo, Pengguna!</h2>
+                <p>Selamat datang kembali di sistem internal.</p>
+            </div>
+            <button class="btn-logout" onclick="logout()">🚪 Keluar</button>
+        </div>
+
+    <div class="content-grid">
+        <div class="stat-card" onclick="location.href='profile.html'">
+            <h3>🧔 Profil Saya</h3>
+            <p>Lihat dan ubah informasi data diri Anda.</p>
+        </div>
+    
+        <div class="stat-card" style="border-left-color: #dc2626;" onclick="location.href='attendance.html'">
+            <h3>⏰ Kehadiran</h3>
+            <p>Catat absensi harian Anda di sini.</p>
+        </div>
+        
+        <div class="stat-card" style="border-left-color: #3b82f6;" onclick="location.href='reports.html'">
+            <h3>📝 Laporan</h3>
+            <p>Akses dokumen dan laporan bulanan.</p>
+        </div>
+        
+        <div class="stat-card" style="border-left-color: #ea580c;" onclick="location.href='master.html'">
+            <h3>🖥️ Master</h3>
+            <p>Employee Master.</p>
+        </div>
+        
+        <div class="stat-card" style="border-left-color: #7e22ce;" onclick="location.href='leave.html'">
+            <h3>🏖️ Leave</h3>
+            <p>Annual Leave.</p>
+        </div>
+        
+        <div class="stat-card" style="border-left-color: #f59e0b;" onclick="location.href='overtime.html'">
+            <h3>💰 Overtime</h3>
+            <p>Overtime Disapproval.</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. Proteksi Halaman: Cek apakah user sudah login
+        const sessionData = localStorage.getItem('userSession');
+        
+        if (!sessionData) {
+            // Jika tidak ada data session, tendang balik ke login
+            alert('Akses ditolak! Silakan login terlebih dahulu.');
+            window.location.href = 'index.html';
+        } else {
+            // Jika ada, tampilkan nama usernya
+            const user = JSON.parse(sessionData);
+            document.getElementById('userNameDisplay').innerText = `Halo, ${user.username}!`;
+        }
+
+        // 2. Fungsi Logout
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                localStorage.removeItem('userSession'); // Hapus data login
+                window.location.href = 'index.html';   // Kembali ke login
+            }
+        }
+    </script>
+</body>
+
+</html>
+
+
+
+
+
