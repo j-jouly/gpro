@@ -192,6 +192,9 @@
 
             // 2. Kita coba ambil dari berbagai kemungkinan nama variabel yang mungkin kamu pakai saat login
             const idKaryawan = session.empl_number || session.EMPL_NMBR || session.id || session.username;
+
+            // 3. AMBIL NILAI DARI COMBO BOX
+            const loctArea = document.getElementById('location-select').value;
             
             const ctx = canvas.getContext('2d');
             canvas.width = video.videoWidth;
@@ -222,7 +225,8 @@
                 LANG_GPSX: userCoords.lng, // Tambahkan X jika memang di database ada X
                 LATT_GPSX: userCoords.lat, // Tambahkan X
                 RADS_GPSX: Math.round(currentDist), // Tambahkan X
-                DEVC_NAME: navigator.userAgent
+                DEVC_NAME: navigator.userAgent,
+                LOCT_AREA: loctArea
             };
         
             console.log("Mengirim data:", payload); // Cek di console F12
