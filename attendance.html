@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Kehadiran | GPS & Face Capture</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --bg: #f1f5f9;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text-dark); padding: 20px; min-height: 100vh; }
+
+        .container { max-width: 600px; margin: 0 auto; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .btn-back { background: var(--white); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; box-shadow: var(--shadow); font-weight: 600; }
+
+        .card { background: var(--white); padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        /* Camera Styles */
+        #camera-container { width: 100%; background: #000; border-radius: 10px; overflow: hidden; position: relative; aspect-ratio: 4/3; margin-bottom: 15px; }
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        #canvas { display: none; }
+        .captured-preview { width: 100%; border-radius: 10px; display: none; margin-bottom: 15px; border: 3px solid var(--success); }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        select, button { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; outline: none; }
+
+        .status-box { padding: 15px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; display: none; line-height: 1.6; }
+        .status-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .btn-action { background: var(--primary); color: white; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-action:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .btn-checkout { background: var(--danger); margin-top: 10px; }
+
+        .coordinate-info { font-size: 11px; color: var(--text-muted); margin-top: 5px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <button class="btn-back" onclick="location.href='dashboard.html'">← Kembali</button>
+            <h2 style="font-size: 20px;">Presensi Kehadiran</h2>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📍 Pilih Lokasi Absen</div>
+            <div class="form-group">
+                <select id="location-select">
+                    <option value="">-- Pilih Lokasi Tugas --</option>
+                    <option value="outlet">Lokasi Outlet (Radius 70m)</option>
+                    <option value="ck">Lokasi CK (Radius 70m)</option>
+                    <option value="admin">Lokasi Admin (Radius 100m)</option>
+                </select>
+            </div>
+            <button class="btn-action" id="btn-check-location">1. Cek Jarak Lokasi</button>
+            <div id="location-status" class="status-box"></div>
+            <div id="coords" class="coordinate-info"></div>
+        </div>
+
+        <div class="card" id="camera-card" style="display: none;">
+            <div class="card-title">📸 Capture Wajah</div>
+            <div id="camera-container">
+                <video id="video" autoplay playsinline></video>
+            </div>
+            <img id="photo-preview" class="captured-preview">
+            
+            <canvas id="canvas"></canvas>
+
+            <div id="action-status" class="status-box"></div>
+            
+            <button class="btn-action" id="btn-checkin">Check In Sekarang</button>
+            <button class="btn-action btn-checkout" id="btn-checkout">Check Out Sekarang</button>
+        </div>
+    </div>
+
+    <script>
+        const LOCATIONS = {
+            outlet: { lat: -7.4665628, lng: 112.4461021, radius: 70 },
+            ck: { lat: -7.487560, lng: 112.429730, radius: 70 },
+            admin: { lat: -7.366710, lng: 112.610286, radius: 100 }
+        };
+
+        let userCoords = { lat: 0, lng: 0 };
+        let selectedLoc = null;
+
+        // Elements
+        const locSelect = document.getElementById('location-select');
+        const btnCheckLoc = document.getElementById('btn-check-location');
+        const locStatus = document.getElementById('location-status');
+        const cameraCard = document.getElementById('camera-card');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photoPreview = document.getElementById('photo-preview');
+
+        // 1. Haversine Formula (Hitung Jarak GPS)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // metres
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c; // in metres
+        }
+
+        // 2. Cek Lokasi & GPS
+        btnCheckLoc.addEventListener('click', () => {
+            const locKey = locSelect.value;
+            if (!locKey) return alert('Pilih lokasi terlebih dahulu!');
+
+            selectedLoc = LOCATIONS[locKey];
+            locStatus.style.display = 'block';
+            locStatus.className = 'status-box';
+            locStatus.textContent = 'Mencari sinyal GPS...';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    userCoords.lat = position.coords.latitude;
+                    userCoords.lng = position.coords.longitude;
+                    
+                    const distance = calculateDistance(
+                        userCoords.lat, userCoords.lng, 
+                        selectedLoc.lat, selectedLoc.lng
+                    );
+
+                    document.getElementById('coords').textContent = `Lat: ${userCoords.lat.toFixed(6)}, Lng: ${userCoords.lng.toFixed(6)}`;
+
+                    if (distance <= selectedLoc.radius) {
+                        locStatus.classList.add('status-success');
+                        locStatus.innerHTML = `✅ <b>Berhasil!</b><br>Jarak Anda: ${distance.toFixed(1)}m. Silakan ambil foto.`;
+                        startCamera();
+                        cameraCard.style.display = 'block';
+                    } else {
+                        locStatus.classList.add('status-error');
+                        locStatus.innerHTML = `❌ <b>Diluar Jangkauan!</b><br>Jarak Anda: ${distance.toFixed(1)}m. Minimal: ${selectedLoc.radius}m.`;
+                        cameraCard.style.display = 'none';
+                    }
+                }, (err) => {
+                    alert('Gagal mendapatkan lokasi. Pastikan GPS aktif.');
+                }, { enableHighAccuracy: true });
+            }
+        });
+
+        // 3. Camera Logic
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                video.srcObject = stream;
+            } catch (err) {
+                alert('Gagal akses kamera: ' + err);
+            }
+        }
+
+        function captureImage() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            // Tambahkan Watermark Koordinat di Foto
+            ctx.font = "20px Arial";
+            ctx.fillStyle = "yellow";
+            ctx.fillText(`GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)}`, 20, canvas.height - 20);
+            
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            photoPreview.src = dataUrl;
+            photoPreview.style.display = 'block';
+            document.getElementById('camera-container').style.display = 'none';
+            return dataUrl;
+        }
+
+        // 4. Submit Absence (Check-In / Out)
+        async function submitAbsence(type) {
+            const imageData = captureImage();
+            const actionStatus = document.getElementById('action-status');
+            actionStatus.style.display = 'block';
+            actionStatus.className = 'status-box status-success';
+            actionStatus.textContent = `Memproses ${type}...`;
+
+            // Di sini Anda bisa menambahkan logic Simpan ke Supabase
+            // Contoh payload:
+            console.log({
+                type: type,
+                location: locSelect.value,
+                coords: userCoords,
+                image: imageData,
+                timestamp: new Date().toISOString()
+            });
+
+            setTimeout(() => {
+                alert(`${type} Berhasil di simpan!`);
+                location.href = 'dashboard.html';
+            }, 2000);
+        }
+
+        document.getElementById('btn-checkin').addEventListener('click', () => submitAbsence('CHECK-IN'));
+        document.getElementById('btn-checkout').addEventListener('click', () => submitAbsence('CHECK-OUT'));
+    </script>
+</body>
+</html>
