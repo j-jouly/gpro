@@ -227,8 +227,11 @@
                 // 7. Upload ke Supabase Storage
                 const { data: uploadData, error: uploadError } = await supabaseClient
                     .storage
-                    .from('attendance-photos')
-                    .upload(filePath, blob);
+                    .from('attendance-photos') 
+                    .upload(filePath, blob, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
         
                 if (uploadError) throw uploadError;
         
