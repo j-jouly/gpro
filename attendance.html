@@ -336,7 +336,7 @@ async function submitAbsence(type) {
         
         // Format Nama File: IN_Nama_Area_Tanggal_Jam.jpg
         const fileTimestamp = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "_" + now.getHours() + "" + now.getMinutes();
-        const fileName = `${type.replace(/\s/g, '')}_${session.username}_${loctArea}_${fileTimestamp}.jpg`;
+        const fileName = `${type.replace(/\s/g, '')}_${session.korxname}_${loctArea}_${fileTimestamp}.jpg`;
         const filePath = `captures/${fileName}`;
 
         // Upload ke Storage
