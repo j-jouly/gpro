@@ -90,11 +90,15 @@
 
         video, canvas { width: 100%; height: 100%; object-fit: cover; }        
         #photo-preview {
-                        max-width: 100%;
-                        height: auto;
-                        display: block;
-                        border-radius: 12px;
-                    }
+            display: none;
+            width: 100%;
+            height: auto; /* Biarkan tinggi mengikuti proporsi asli foto */
+            max-height: 70vh; /* Agar tidak terlalu panjang di layar HP */
+            object-fit: contain; /* Memastikan seluruh gambar (termasuk watermark bawah) terlihat */
+            border-radius: var(--radius-md);
+            background: #000; /* Memberi background hitam jika rasio layar berbeda */
+            margin-bottom: 15px;
+        }
 
         .btn {
             width: 100%; padding: 16px; border-radius: var(--radius-md);
@@ -264,9 +268,9 @@ async function submitAbsence(type) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // 3. TAMBAHKAN WATERMARK (Overlay Hitam Transparan)
-    const boxHeight = 120;
-    const bottomPadding = 25; // Jarak aman dari pinggir paling bawah agar tidak terpotong
-    ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Background hitam transparan
+    const boxHeight = 140; // 120
+    const bottomPadding = 45; // 25 // Jarak aman dari pinggir paling bawah agar tidak terpotong
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)"; //0.6 // Background hitam transparan
     ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
     // 4. TEKS WATERMARK
