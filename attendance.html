@@ -353,8 +353,8 @@ async function submitAbsence(type) {
 
         // Simpan ke Database
         const payload = {
-            EMPL_NMBR: session.empl_number || session.id || "admin",
-            KORX_NAME: session.username,
+            EMPL_NMBR: session.emplnmbr || session.id || "admin",
+            KORX_NAME: session.korxname,
             TRAN_DATE: now.toISOString().split('T')[0],
             TRAN_TIME: timeStr,
             TRAN_STAT: type,
