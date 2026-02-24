@@ -269,7 +269,7 @@ async function submitAbsence(type) {
 
     // 3. TAMBAHKAN WATERMARK (Overlay Hitam Transparan)
     const boxHeight = 140; // 120
-    const bottomPadding = 80; // 45 - 25 // Jarak aman dari pinggir paling bawah agar tidak terpotong
+    const bottomPadding = 65; // 45 - 25 // Jarak aman dari pinggir paling bawah agar tidak terpotong
     ctx.fillStyle = "rgba(0, 0, 0, 0.65)"; //0.7 - 0.6 // Background hitam transparan
     ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
