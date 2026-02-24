@@ -220,7 +220,7 @@
             const blob = await (await fetch(imageBase64)).blob(); // Ubah ke file Blob
         
             // 6. Buat Nama File Unik
-            const fileName = `${idKaryawan}_${Date.now()}.jpg`;
+            const fileName = `${type}_${idKaryawan}_${loctArea}_${timeStr}_${Date.now()}.jpg`;
             const filePath = `captures/${fileName}`;
         
             try {
