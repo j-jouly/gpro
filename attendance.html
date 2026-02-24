@@ -110,8 +110,36 @@
         .btn-primary { 
             background: var(--primary); color: white; 
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transisi halus */
+            position: relative;
+            overflow: hidden;
         }
 
+        /* Efek Hover (Saat kursor di atas tombol atau disentuh) */
+        @media (hover: hover) {
+            .btn-primary:hover {
+                background: var(--primary-dark);
+                transform: translateY(-2px); /* Tombol sedikit terangkat */
+                box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+            }
+        }
+        
+        /* Efek Active (Saat tombol sedang ditekan/klik) */
+        .btn-primary:active {
+            transform: translateY(1px); /* Tombol terasa tertekan ke bawah */
+            box-shadow: 0 2px 4px -1px rgba(37, 99, 235, 0.2);
+            background: #1e40af; /* Biru yang lebih gelap lagi */
+            transition: all 0.1s;
+        }
+        
+        /* Tambahan: Efek Loading/Disabled agar tidak flat saat proses */
+        .btn-primary:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
         .btn-orange {
             background: #e64a19; color: white; margin-top: 10px;
             box-shadow: 0 4px 12px rgba(230, 74, 25, 0.25);
@@ -208,6 +236,10 @@
     document.getElementById('btn-lock-location').addEventListener('click', function() {
         const locKey = document.getElementById('location-select').value;
         const statusPill = document.getElementById('status-display');
+
+        const btn = this;
+        btn.innerHTML = "⏳ Menghubungkan GPS...";
+        btn.disabled = true; // Mencegah klik ganda
         
         if (!locKey) return alert('Pilih lokasi terlebih dahulu!');
         
