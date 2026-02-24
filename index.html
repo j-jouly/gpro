@@ -285,7 +285,7 @@
             e.preventDefault();
             
             btnLogin.disabled = true;
-            btnText.innerHTML = 'Memproses...';
+            btnText.innerHTML = '⏳ Memproses...';
             messageBox.style.display = 'none';
 
             const usernameInput = document.getElementById('email').value;
@@ -300,10 +300,10 @@
                     .single();
 
                 if (error || !data) {
-                    throw new Error('Username atau Password tidak ditemukan.');
+                    throw new Error('⛔ Username atau Password tidak ditemukan.');
                 }
 
-                showMessage('Login Berhasil! Mengalihkan...', 'success');
+                showMessage('🔓 Login Berhasil! Mengalihkan...', 'success');
                 
                 localStorage.setItem('userSession', JSON.stringify({
                     username: data.EMPL_UNME,
