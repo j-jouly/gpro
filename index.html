@@ -294,7 +294,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('TH_EMP01M')
-                    .select('EMPL_UNME, EMPL_PSWD')
+                    .select('*')
                     .eq('EMPL_UNME', usernameInput)
                     .eq('EMPL_PSWD', passwordInput)
                     .single();
@@ -304,7 +304,7 @@
                 }
 
                 showMessage('🔓 Login Berhasil! Mengalihkan...', 'success');
-
+                console.log("Data user berhasil ditarik:", data);
                 
                 localStorage.setItem('userSession', JSON.stringify({
                     username: data.EMPL_UNME,
