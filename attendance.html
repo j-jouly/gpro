@@ -237,11 +237,11 @@
         const locKey = document.getElementById('location-select').value;
         const statusPill = document.getElementById('status-display');
 
+        if (!locKey) return alert('Pilih lokasi terlebih dahulu!');
+
         const btn = this;
         btn.innerHTML = "⏳ Menghubungkan GPS...";
         btn.disabled = true; // Mencegah klik ganda
-        
-        if (!locKey) return alert('Pilih lokasi terlebih dahulu!');
         
         selectedLoc = LOCATIONS[locKey];
         statusPill.style.display = 'block';
