@@ -259,8 +259,8 @@ async function submitAbsence(type) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // 3. TAMBAHKAN WATERMARK (Overlay Hitam Transparan)
-    const boxHeight = 110;
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Background hitam transparan
+    const boxHeight = 100;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Background hitam transparan
     ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
     // 4. TEKS WATERMARK
@@ -269,6 +269,7 @@ async function submitAbsence(type) {
     const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 
     ctx.fillStyle = "white";
+    ctx.textBaseline = "top"; // Memudahkan pengaturan jarak teks
     ctx.font = "bold 24px Inter, Arial";
     ctx.fillText(type.toUpperCase() + " - " + session.username.toUpperCase(), 20, canvas.height - 70);
     
