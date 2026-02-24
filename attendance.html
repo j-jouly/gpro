@@ -201,7 +201,7 @@
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0);
         
-            // Watermark
+            // 4. Watermark
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
             ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
             ctx.fillStyle = "white";
@@ -214,8 +214,33 @@
             document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
             document.getElementById('photo-preview').style.display = 'block';
             document.getElementById('camera-container').style.display = 'none';
+
+            // 5. Ambil data gambar dari Canvas  --> Start membuat image URL          
+            const imageBase64 = canvas.toDataURL('image/jpeg', 0.7); // 0.7 untuk kompresi agar tidak terlalu besar
+            const blob = await (await fetch(imageBase64)).blob(); // Ubah ke file Blob
         
-            // 2. PAYLOAD (Sesuaikan nama kolom dengan akhiran X)
+            // 6. Buat Nama File Unik
+            const fileName = `${idKaryawan}_${Date.now()}.jpg`;
+            const filePath = `captures/${fileName}`;
+        
+            try {
+                // 7. Upload ke Supabase Storage
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('attendance-photos')
+                    .upload(filePath, blob);
+        
+                if (uploadError) throw uploadError;
+        
+                // 8. Ambil URL Publik foto tersebut
+                const { data: urlData } = supabaseClient
+                    .storage
+                    .from('attendance-photos')
+                    .getPublicUrl(filePath);
+        
+                const photoUrl = urlData.publicUrl;
+        
+            // 9. PAYLOAD (Sesuaikan nama kolom dengan akhiran X)
             const payload = {
                 EMPL_NMBR: idKaryawan,    //session.empl_number,
                 KORX_NAME: session.username, 
@@ -226,7 +251,8 @@
                 LATT_GPSX: userCoords.lat, // Tambahkan X
                 RADS_GPSX: Math.round(currentDist), // Tambahkan X
                 DEVC_NAME: navigator.userAgent,
-                LOCT_AREA: loctArea
+                LOCT_AREA: loctArea,
+                IMGE_URLX: photoUrl
             };
         
             console.log("Mengirim data:", payload); // Cek di console F12
