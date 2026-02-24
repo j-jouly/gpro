@@ -269,6 +269,9 @@
             } catch (err) {
                 alert("Terjadi kesalahan sistem: " + err.message);
             }
+        }catch (err) {
+            alert("Gagal: " + err.message);
+            console.error(err);
         }
     }
             
