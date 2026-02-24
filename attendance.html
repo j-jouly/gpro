@@ -92,11 +92,11 @@
         #photo-preview {
             display: none;
             width: 100%;
-            height: auto; /* Biarkan tinggi mengikuti proporsi asli foto */
-            max-height: 70vh; /* Agar tidak terlalu panjang di layar HP */
-            object-fit: contain; /* Memastikan seluruh gambar (termasuk watermark bawah) terlihat */
+            height: auto; 
+            max-height: 400px; /* Batasi tinggi preview agar tidak meluber ke bawah layar */
+            object-fit: contain; /* Menampilkan seluruh gambar tanpa terpotong */
+            border: 2px solid var(--border);
             border-radius: var(--radius-md);
-            background: #000; /* Memberi background hitam jika rasio layar berbeda */
             margin-bottom: 15px;
         }
 
@@ -269,8 +269,8 @@ async function submitAbsence(type) {
 
     // 3. TAMBAHKAN WATERMARK (Overlay Hitam Transparan)
     const boxHeight = 140; // 120
-    const bottomPadding = 45; // 25 // Jarak aman dari pinggir paling bawah agar tidak terpotong
-    ctx.fillStyle = "rgba(0, 0, 0, 0.7)"; //0.6 // Background hitam transparan
+    const bottomPadding = 80; // 45 - 25 // Jarak aman dari pinggir paling bawah agar tidak terpotong
+    ctx.fillStyle = "rgba(0, 0, 0, 0.65)"; //0.7 - 0.6 // Background hitam transparan
     ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
     // 4. TEKS WATERMARK
