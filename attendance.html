@@ -242,63 +242,96 @@
         document.getElementById('main-actions').style.display = 'grid';
     }
 
-    async function submitAbsence(type) {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const session = JSON.parse(localStorage.getItem('userSession') || '{}');
-        const loctArea = document.getElementById('location-select').value;
+async function submitAbsence(type) {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const session = JSON.parse(localStorage.getItem('userSession') || '{}');
+    const loctArea = document.getElementById('location-select').value;
+    
+    if (!session.username) return alert("Sesi habis!");
+
+    // 1. Persiapan Canvas
+    const ctx = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // 2. Gambar Foto dari Video ke Canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // 3. TAMBAHKAN WATERMARK (Overlay Hitam Transparan)
+    const boxHeight = 110;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Background hitam transparan
+    ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
+
+    // 4. TEKS WATERMARK
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('id-ID').replace(/\./g, ':');
+    const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    ctx.fillStyle = "white";
+    ctx.font = "bold 24px Inter, Arial";
+    ctx.fillText(type.toUpperCase() + " - " + session.username.toUpperCase(), 20, canvas.height - 70);
+    
+    ctx.font = "18px Inter, Arial";
+    ctx.fillText(`📍 Area: ${loctArea} | Jarak: ${currentDist.toFixed(1)}m`, 20, canvas.height - 40);
+    ctx.fillText(`🕒 ${dateStr} ${timeStr} | ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`, 20, canvas.height - 15);
+
+    // 5. Tampilkan Preview di UI
+    const photoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    document.getElementById('photo-preview').src = photoDataUrl;
+    document.getElementById('photo-preview').style.display = 'block';
+    document.getElementById('video').style.display = 'none';
+    document.getElementById('btn-retry').style.display = 'block';
+    document.getElementById('main-actions').style.display = 'none';
+
+    // 6. PROSES UPLOAD (Foto yang sudah ada watermark-nya)
+    try {
+        const blob = await (await fetch(photoDataUrl)).blob();
         
-        if (!session.username) return alert("Sesi habis!");
-
-        // Capture Frame
-        const ctx = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-
-        // UI Feedback
-        document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
-        document.getElementById('photo-preview').style.display = 'block';
-        document.getElementById('video').style.display = 'none';
-        document.getElementById('btn-retry').style.display = 'block';
-        document.getElementById('main-actions').style.display = 'none';
-
-        // Process Upload
-        const blob = await (await fetch(canvas.toDataURL('image/jpeg', 0.7))).blob();
-        const timeStr = new Date().toLocaleTimeString('id-ID').replace(/\./g, ':');
-        const fileName = `IN_${session.username}_${loctArea}_${Date.now()}.jpg`;
+        // Format Nama File: IN_Nama_Area_Tanggal_Jam.jpg
+        const fileTimestamp = now.getFullYear() + "" + (now.getMonth()+1) + "" + now.getDate() + "_" + now.getHours() + "" + now.getMinutes();
+        const fileName = `${type.replace(/\s/g, '')}_${session.username}_${loctArea}_${fileTimestamp}.jpg`;
         const filePath = `captures/${fileName}`;
 
-        try {
-            const { data: uploadData, error: upErr } = await supabaseClient.storage.from('attendance-photos').upload(filePath, blob);
-            if (upErr) throw upErr;
+        // Upload ke Storage
+        const { data: uploadData, error: upErr } = await supabaseClient.storage
+            .from('attendance-photos')
+            .upload(filePath, blob);
 
-            const { data: urlData } = supabaseClient.storage.from('attendance-photos').getPublicUrl(filePath);
+        if (upErr) throw upErr;
 
-            const payload = {
-                EMPL_NMBR: session.empl_number || session.id || "admin",
-                KORX_NAME: session.username,
-                TRAN_DATE: new Date().toISOString().split('T')[0],
-                TRAN_TIME: timeStr,
-                TRAN_STAT: type,
-                LANG_GPSX: userCoords.lng,
-                LATT_GPSX: userCoords.lat,
-                RADS_GPSX: Math.round(currentDist),
-                DEVC_NAME: navigator.userAgent,
-                LOCT_AREA: loctArea,
-                IMGE_URLX: urlData.publicUrl
-            };
+        // Ambil URL Publik
+        const { data: urlData } = supabaseClient.storage
+            .from('attendance-photos')
+            .getPublicUrl(filePath);
 
-            const { error: dbErr } = await supabaseClient.from('TH_ATTN01').insert([payload]);
-            if (dbErr) throw dbErr;
+        // Simpan ke Database
+        const payload = {
+            EMPL_NMBR: session.empl_number || session.id || "admin",
+            KORX_NAME: session.username,
+            TRAN_DATE: now.toISOString().split('T')[0],
+            TRAN_TIME: timeStr,
+            TRAN_STAT: type,
+            LANG_GPSX: userCoords.lng,
+            LATT_GPSX: userCoords.lat,
+            RADS_GPSX: Math.round(currentDist),
+            DEVC_NAME: navigator.userAgent,
+            LOCT_AREA: loctArea,
+            IMGE_URLX: urlData.publicUrl
+        };
 
-            alert("Absensi Berhasil!");
-            window.location.href = 'dashboard.html';
-        } catch (err) {
-            alert("Error: " + err.message);
-            resetCamera();
-        }
+        const { error: dbErr } = await supabaseClient.from('TH_ATTN01').insert([payload]);
+        if (dbErr) throw dbErr;
+
+        alert(`Berhasil ${type}! Foto dengan watermark telah tersimpan.`);
+        window.location.href = 'dashboard.html';
+
+    } catch (err) {
+        alert("Gagal menyimpan: " + err.message);
+        console.error(err);
+        resetCamera();
     }
+}
 
     function updateClock() {
         const now = new Date();
