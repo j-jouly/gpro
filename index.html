@@ -294,7 +294,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('TH_EMP01M')
-                    .select('EMPL_UNME, EMPL_PSWD, EMPL_NMBR, KORX_NAME')
+                    .select('EMPL_UNME, EMPL_PSWD')
                     .eq('EMPL_UNME', usernameInput)
                     .eq('EMPL_PSWD', passwordInput)
                     .single();
