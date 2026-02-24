@@ -315,7 +315,7 @@ async function submitAbsence(type) {
     ctx.textBaseline = "bottom"; // Memudahkan pengaturan jarak teks
     ctx.font = "bold 20px Inter, Arial";    
     //ctx.fillText(type.toUpperCase() + " - " + session.username.toUpperCase(), 20, canvas.height - 70);
-    ctx.fillText(`${statusSymbol} ${type.toUpperCase()} - ${session.username.toUpperCase()}`, 20, canvas.height - (bottomPadding + 55));
+    ctx.fillText(`${statusSymbol} ${type.toUpperCase()} - ${session.korxname.toUpperCase()}`, 20, canvas.height - (bottomPadding + 55));
     
     ctx.font = "18px Inter, Arial";
     ctx.fillStyle = "#e2e8f0";
