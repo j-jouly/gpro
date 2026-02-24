@@ -294,7 +294,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('TH_EMP01M')
-                    .select('EMPL_UNME, EMPL_PSWD')
+                    .select('EMPL_NMBR, KORX_NAME, EMPL_UNME, EMPL_PSWD')
                     .eq('EMPL_UNME', usernameInput)
                     .eq('EMPL_PSWD', passwordInput)
                     .single();
@@ -304,9 +304,12 @@
                 }
 
                 showMessage('🔓 Login Berhasil! Mengalihkan...', 'success');
+
                 
                 localStorage.setItem('userSession', JSON.stringify({
                     username: data.EMPL_UNME,
+                    emplnmbr:data.EMPL_NMBR,
+                    korxname:data.KORX_NAME
                     loginTime: new Date().getTime()
                 }));
 
