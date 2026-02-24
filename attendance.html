@@ -88,8 +88,13 @@
             overflow: hidden; position: relative; margin-bottom: 15px;
         }
 
-        video, canvas { width: 100%; height: 100%; object-fit: cover; }
-        #photo-preview { display: none; width: 100%; border-radius: var(--radius-md); }
+        video, canvas { width: 100%; height: 100%; object-fit: cover; }        
+        #photo-preview {
+                        max-width: 100%;
+                        height: auto;
+                        display: block;
+                        border-radius: 12px;
+                    }
 
         .btn {
             width: 100%; padding: 16px; border-radius: var(--radius-md);
@@ -259,7 +264,8 @@ async function submitAbsence(type) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // 3. TAMBAHKAN WATERMARK (Overlay Hitam Transparan)
-    const boxHeight = 100;
+    const boxHeight = 120;
+    const bottomPadding = 25; // Jarak aman dari pinggir paling bawah agar tidak terpotong
     ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Background hitam transparan
     ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
@@ -269,11 +275,12 @@ async function submitAbsence(type) {
     const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 
     ctx.fillStyle = "white";
-    ctx.textBaseline = "top"; // Memudahkan pengaturan jarak teks
-    ctx.font = "bold 24px Inter, Arial";
+    ctx.textBaseline = "bottom"; // Memudahkan pengaturan jarak teks
+    ctx.font = "bold 20px Inter, Arial";
     ctx.fillText(type.toUpperCase() + " - " + session.username.toUpperCase(), 20, canvas.height - 70);
     
     ctx.font = "18px Inter, Arial";
+    ctx.fillStyle = "#e2e8f0";
     ctx.fillText(`📍 Area: ${loctArea} | Jarak: ${currentDist.toFixed(1)}m`, 20, canvas.height - 40);
     ctx.fillText(`🕒 ${dateStr} ${timeStr} | ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`, 20, canvas.height - 15);
 
