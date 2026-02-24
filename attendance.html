@@ -2,86 +2,311 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presensi GPS & Face Capture</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Presensi Digital - Professional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-            --white: #ffffff;
-            --text-dark: #1e293b;
+            --primary-dark: #1d4ed8;
+            --success: #059669;
+            --danger: #dc2626;
+            --surface: #ffffff;
+            --background: #f8fafc;
+            --text-main: #1e293b;
             --text-muted: #64748b;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            --radius: 16px;
+            --border: #e2e8f0;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg); color: var(--text-dark); min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        .container { width: 100%; max-width: 480px; }
-        .card { background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid #eef2f6; }
-        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; color: var(--text-dark); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
-        
-        select { width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid #e2e8f0; font-size: 15px; outline: none; background-color: white; }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+        }
 
-        .btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: #f8fafc; color: var(--text-muted); border: 1.5px solid #e2e8f0; }
+        /* Header Section */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding: 10px 5px;
+        }
 
-        #camera-container { width: 100%; border-radius: 12px; overflow: hidden; background: #000; aspect-ratio: 4/3; margin-bottom: 15px; border: 2px solid #e2e8f0; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        .captured-preview { width: 100%; border-radius: 12px; display: none; margin-bottom: 15px; border: 4px solid var(--success); }
-        
-        .status-box { padding: 15px; border-radius: 10px; font-size: 14px; margin-top: 15px; display: none; line-height: 1.5; }
-        .status-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: block; }
-        .status-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; display: block; }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-        .coordinate-badge { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px; background: #f1f5f9; padding: 5px; border-radius: 6px; display: none; }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+
+        .user-text h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .user-text p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Card System */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .card-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Form Elements */
+        .select-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background-color: #f1f5f9;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text-main);
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Camera Box */
+        .camera-viewport {
+            width: 100%;
+            aspect-ratio: 4/5;
+            background: #000;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+        }
+
+        video, canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #photo-preview {
+            display: none;
+            width: 100%;
+            border-radius: var(--radius-md);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Update CSS Tombol Konfirmasi (Blue) */
+        .btn-primary { 
+            background: var(--primary); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Hover & Active Effect untuk Konfirmasi */
+        @media (hover: hover) {
+            .btn-primary:hover {
+                background: var(--primary-dark);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+            }
+        }
+        .btn-primary:active { 
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Tombol Beranda (Orange-Red Professional) */
+        .btn-orange {
+            background: #e64a19; /* Deep Orange-Red */
+            color: white;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(230, 74, 25, 0.25);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (hover: hover) {
+            .btn-orange:hover {
+                background: #bf360c; /* Warna lebih gelap saat hover */
+                transform: translateY(-2px);
+                box-shadow: 0 8px 18px rgba(230, 74, 25, 0.35);
+            }
+        }
+
+        .btn-orange:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(230, 74, 25, 0.2);
+        }
+        .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
+        .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .action-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-in { background: var(--success); color: white; }
+        .btn-out { background: var(--danger); color: white; }
+
+        .btn-text {
+            background: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 14px;
+            padding: 10px;
+            text-decoration: none;
+        }
+
+        /* Status Pill */
+        .status-pill {
+            padding: 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .status-pill.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .status-pill.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="card">
-            <div class="card-title">📍 Validasi Presensi</div>
-            <div class="form-group">
-                <label>Pilih Lokasi Tugas</label>
-                <select id="location-select">
-                    <option value="">-- Pilih Lokasi --</option>
-                    <option value="outlet">Lokasi Outlet (70m)</option>
-                    <option value="ck">Lokasi CK (70m)</option>
-                    <option value="admin">Lokasi Admin (100m)</option>
-                </select>
+<div class="app-container">
+    <div class="header">
+        <div class="user-info">
+            <div class="avatar" id="user-initial">A</div>
+            <div class="user-text">
+                <h2 id="user-name">Memuat...</h2>
+                <p id="user-id">ID: -</p>
             </div>
-            <button class="btn btn-primary" id="btn-check-location">1. Cek Jarak Lokasi</button>
-            <button class="btn btn-outline" onclick="window.location.href='dashboard.html'">Kembali ke Dashboard</button>
-            <div id="location-status" class="status-box"></div>
-            <div id="coords" class="coordinate-badge"></div>
         </div>
-
-        <div class="card" id="camera-card" style="display: none;">
-            <div class="card-title">📸 Foto Verifikasi</div>
-            <div id="camera-container">
-                <video id="video" autoplay playsinline></video>
-            </div>
-            <img id="photo-preview" class="captured-preview">
-            <canvas id="canvas" style="display:none;"></canvas>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button class="btn btn-primary" style="background-color: var(--success);" id="btn-checkin">Check In</button>
-                <button class="btn btn-primary" style="background-color: var(--danger);" id="btn-checkout">Check Out</button>
-            </div>
-            <button class="btn btn-outline" onclick="resetCamera()" style="margin-top: 10px;">Foto Ulang</button>
+        <div class="date-badge" style="text-align: right;">
+            <div id="live-clock" style="font-weight: 700; color: var(--primary);">00:00</div>
+            <div style="font-size: 11px; color: var(--text-muted);" id="live-date">24 Feb 2026</div>
         </div>
     </div>
+
+    <div class="card">
+        <span class="card-label">Konfigurasi Lokasi</span>
+        <div class="select-wrapper">
+            <select id="location-select">
+                <option value="" disabled selected>Pilih Area Tugas</option>
+                <option value="Outlet">📍 Area Outlet</option>
+                <option value="CK">🏭 Area CK</option>
+                <option value="Admin">🏢 Area Admin</option>
+            </select>
+        </div>
+        
+        <div id="status-display" class="status-pill"></div>
+
+        <button class="btn btn-primary" id="btn-lock-location">
+            Konfirmasi Lokasi & Cek GPS
+        </button>
+    </div>
+
+    <div id="camera-section" class="card" style="display: none; animation: slideUp 0.4s ease-out;">
+        <span class="card-label">Verifikasi Wajah</span>
+        <div class="camera-viewport" id="viewport">
+            <video id="video" autoplay playsinline></video>
+            <img id="photo-preview" alt="Preview">
+        </div>
+
+        <div class="action-group" id="main-actions">
+            <button class="btn btn-in" onclick="submitAbsence('Check In')">Masuk</button>
+            <button class="btn btn-out" onclick="submitAbsence('Check Out')">Pulang</button>
+        </div>
+        
+        <button class="btn btn-text" id="btn-retry" style="display:none;" onclick="resetCamera()">
+            🔄 Foto Ulang
+        </button>
+    </div>
+
+    <div style="margin-top: 20px; border-top: 1px dashed var(--border); padding-top: 20px;">
+        <button class="btn btn-orange" onclick="window.location.href='dashboard.html'">
+            ← Kembali ke Beranda
+        </button>
+    </div>
+</div>
+
 
     <script>
         // --- 1. CONFIG (FIXED VARIABLES) ---
@@ -277,7 +502,23 @@
             console.error(err);
         }
     }
-            
+
+    // Logic Tambahan untuk UI
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('live-date').innerText = now.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Ambil data session untuk header
+    const session = JSON.parse(localStorage.getItem('userSession') || '{}');
+    if(session.username) {
+        document.getElementById('user-name').innerText = session.username;
+        document.getElementById('user-id').innerText = "ID: " + (session.empl_number || session.id || 'N/A');
+        document.getElementById('user-initial').innerText = session.username.charAt(0).toUpperCase();
+    }        
 
         document.getElementById('btn-checkin').addEventListener('click', () => submitAbsence('Check In'));
         document.getElementById('btn-checkout').addEventListener('click', () => submitAbsence('Check Out'));
