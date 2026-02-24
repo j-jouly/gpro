@@ -22,10 +22,7 @@
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -37,13 +34,8 @@
             min-height: 100vh;
         }
 
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            padding: 20px;
-        }
+        .app-container { width: 100%; max-width: 480px; padding: 20px; }
 
-        /* Header Section */
         .header {
             display: flex;
             align-items: center;
@@ -52,39 +44,20 @@
             padding: 10px 5px;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .user-info { display: flex; align-items: center; gap: 12px; }
 
         .avatar {
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 1.1rem;
             box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
         }
 
-        .user-text h2 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 700;
-        }
+        .user-text h2 { margin: 0; font-size: 16px; font-weight: 700; }
+        .user-text p { margin: 0; font-size: 13px; color: var(--text-muted); }
 
-        .user-text p {
-            margin: 0;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        /* Card System */
         .card {
             background: var(--surface);
             border-radius: var(--radius-lg);
@@ -95,158 +68,59 @@
         }
 
         .card-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            letter-spacing: 0.05em;
-        }
-
-        /* Form Elements */
-        .select-wrapper {
-            position: relative;
-            margin-bottom: 15px;
+            display: block; font-size: 12px; font-weight: 700;
+            color: var(--primary); text-transform: uppercase;
+            margin-bottom: 12px; letter-spacing: 0.05em;
         }
 
         select {
-            width: 100%;
-            padding: 14px 16px;
+            width: 100%; padding: 14px 16px;
             border-radius: var(--radius-md);
             border: 1px solid var(--border);
             background-color: #f1f5f9;
-            font-size: 15px;
-            font-family: inherit;
-            color: var(--text-main);
-            appearance: none;
-            cursor: pointer;
-            transition: all 0.2s;
+            font-size: 15px; color: var(--text-main);
+            appearance: none; cursor: pointer;
         }
 
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        /* Camera Box */
         .camera-viewport {
-            width: 100%;
-            aspect-ratio: 4/5;
-            background: #000;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 15px;
-            border: 1px solid var(--border);
+            width: 100%; aspect-ratio: 4/5;
+            background: #000; border-radius: var(--radius-md);
+            overflow: hidden; position: relative; margin-bottom: 15px;
         }
 
-        video, canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        video, canvas { width: 100%; height: 100%; object-fit: cover; }
+        #photo-preview { display: none; width: 100%; border-radius: var(--radius-md); }
 
-        #photo-preview {
-            display: none;
-            width: 100%;
-            border-radius: var(--radius-md);
-        }
-
-        /* Buttons */
         .btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: var(--radius-md);
-            font-size: 15px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            width: 100%; padding: 16px; border-radius: var(--radius-md);
+            font-size: 15px; font-weight: 600; border: none;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
 
-        /* Update CSS Tombol Konfirmasi (Blue) */
         .btn-primary { 
-            background: var(--primary); 
-            color: white; 
+            background: var(--primary); color: white; 
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
-        /* Hover & Active Effect untuk Konfirmasi */
-        @media (hover: hover) {
-            .btn-primary:hover {
-                background: var(--primary-dark);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
-            }
-        }
-        .btn-primary:active { 
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
-        }
-
-        /* Tombol Beranda (Orange-Red Professional) */
         .btn-orange {
-            background: #e64a19; /* Deep Orange-Red */
-            color: white;
-            margin-top: 10px;
+            background: #e64a19; color: white; margin-top: 10px;
             box-shadow: 0 4px 12px rgba(230, 74, 25, 0.25);
-            border: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @media (hover: hover) {
-            .btn-orange:hover {
-                background: #bf360c; /* Warna lebih gelap saat hover */
-                transform: translateY(-2px);
-                box-shadow: 0 8px 18px rgba(230, 74, 25, 0.35);
-            }
-        }
+        .btn-orange:hover { background: #bf360c; transform: translateY(-2px); }
 
-        .btn-orange:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 5px rgba(230, 74, 25, 0.2);
-        }
-        .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
-        .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
-
-        .action-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
+        .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn-in { background: var(--success); color: white; }
         .btn-out { background: var(--danger); color: white; }
 
-        .btn-text {
-            background: none;
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 14px;
-            padding: 10px;
-            text-decoration: none;
-        }
-
-        /* Status Pill */
         .status-pill {
-            padding: 12px;
-            border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 500;
-            display: none;
-            margin-bottom: 15px;
-            line-height: 1.5;
+            padding: 12px; border-radius: var(--radius-md);
+            font-size: 13px; font-weight: 500; display: none;
+            margin-bottom: 15px; line-height: 1.5;
         }
-        .status-pill.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .status-pill.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
         .status-pill.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-
     </style>
 </head>
 <body>
@@ -271,240 +145,161 @@
         <div class="select-wrapper">
             <select id="location-select">
                 <option value="" disabled selected>Pilih Area Tugas</option>
-                <option value="Outlet">📍 Area Outlet</option>
-                <option value="CK">🏭 Area CK</option>
-                <option value="Admin">🏢 Area Admin</option>
+                <option value="outlet">📍 Area Outlet</option>
+                <option value="ck">🏭 Area CK</option>
+                <option value="admin">🏢 Area Admin</option>
             </select>
         </div>
-        
         <div id="status-display" class="status-pill"></div>
-
-        <button class="btn btn-primary" id="btn-lock-location">
-            Konfirmasi Lokasi & Cek GPS
-        </button>
+        <button class="btn btn-primary" id="btn-lock-location">Konfirmasi Lokasi & Cek GPS</button>
     </div>
 
-    <div id="camera-section" class="card" style="display: none; animation: slideUp 0.4s ease-out;">
+    <div id="camera-section" class="card" style="display: none;">
         <span class="card-label">Verifikasi Wajah</span>
         <div class="camera-viewport" id="viewport">
             <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display:none;"></canvas>
             <img id="photo-preview" alt="Preview">
         </div>
-
         <div class="action-group" id="main-actions">
-            <button class="btn btn-in" onclick="submitAbsence('Check In')">Masuk</button>
-            <button class="btn btn-out" onclick="submitAbsence('Check Out')">Pulang</button>
+            <button class="btn btn-in" id="btn-checkin">Masuk</button>
+            <button class="btn btn-out" id="btn-checkout">Pulang</button>
         </div>
-        
-        <button class="btn btn-text" id="btn-retry" style="display:none;" onclick="resetCamera()">
-            🔄 Foto Ulang
-        </button>
+        <button class="btn" id="btn-retry" style="display:none; margin-top:10px;" onclick="resetCamera()">🔄 Foto Ulang</button>
     </div>
 
-    <div style="margin-top: 20px; border-top: 1px dashed var(--border); padding-top: 20px;">
-        <button class="btn btn-orange" onclick="window.location.href='dashboard.html'">
-            ← Kembali ke Beranda
-        </button>
-    </div>
+    <button class="btn btn-orange" onclick="window.location.href='dashboard.html'">← Kembali ke Beranda</button>
 </div>
 
+<script>
+    const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <script>
-        // --- 1. CONFIG (FIXED VARIABLES) ---
-        const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const LOCATIONS = {
+        outlet: { lat: -7.4665628, lng: 112.4461021, radius: 70 },
+        ck: { lat: -7.487560, lng: 112.429730, radius: 70 },
+        admin: { lat: -7.366710, lng: 112.610286, radius: 100 }
+    };
 
-        const LOCATIONS = {
-            outlet: { lat: -7.4665628, lng: 112.4461021, radius: 70 },
-            ck: { lat: -7.487560, lng: 112.429730, radius: 70 },
-            admin: { lat: -7.366710, lng: 112.610286, radius: 100 }
-        };
+    let userCoords = { lat: 0, lng: 0 };
+    let selectedLoc = null;
+    let currentDist = 0;
 
-        let userCoords = { lat: 0, lng: 0 };
-        let selectedLoc = null;
-        let currentDist = 0;
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const p1 = lat1 * Math.PI/180;
+        const p2 = lat2 * Math.PI/180;
+        const dp = (lat2-lat1) * Math.PI/180;
+        const dl = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
 
-        // --- 2. FUNGSI JARAK ---
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; 
-            const p1 = lat1 * Math.PI/180;
-            const p2 = lat2 * Math.PI/180;
-            const dp = (lat2-lat1) * Math.PI/180;
-            const dl = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-        }
+    document.getElementById('btn-lock-location').addEventListener('click', function() {
+        const locKey = document.getElementById('location-select').value;
+        const statusPill = document.getElementById('status-display');
+        
+        if (!locKey) return alert('Pilih lokasi terlebih dahulu!');
+        
+        selectedLoc = LOCATIONS[locKey];
+        statusPill.style.display = 'block';
+        statusPill.className = 'status-pill info';
+        statusPill.textContent = '📡 Mengecek koordinat GPS...';
 
-        // --- 3. EVENT LISTENER ---
-        document.getElementById('btn-check-location').addEventListener('click', function() {
-            const locKey = document.getElementById('location-select').value;
-            const locStatus = document.getElementById('location-status');
-            
-            if (!locKey) {
-                alert('Pilih lokasi terlebih dahulu!');
-                return;
-            }
-            
-            selectedLoc = LOCATIONS[locKey];
-            locStatus.style.display = 'block';
-            locStatus.className = 'status-box';
-            locStatus.textContent = 'Menghubungkan ke GPS...';
+        navigator.geolocation.getCurrentPosition((pos) => {
+            userCoords.lat = pos.coords.latitude;
+            userCoords.lng = pos.coords.longitude;
+            currentDist = getDistance(userCoords.lat, userCoords.lng, selectedLoc.lat, selectedLoc.lng);
 
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        userCoords.lat = pos.coords.latitude;
-                        userCoords.lng = pos.coords.longitude;
-                        currentDist = getDistance(userCoords.lat, userCoords.lng, selectedLoc.lat, selectedLoc.lng);
-                        
-                        document.getElementById('coords').style.display = 'block';
-                        document.getElementById('coords').textContent = `Koordinat: ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`;
-
-                        if (currentDist <= selectedLoc.radius) {
-                            locStatus.className = 'status-box status-success';
-                            locStatus.innerHTML = `✅ <b>Berhasil!</b> Anda berada ${currentDist.toFixed(1)}m dari titik.`;
-                            startCamera();
-                            document.getElementById('camera-card').style.display = 'block';
-                        } else {
-                            locStatus.className = 'status-box status-error';
-                            locStatus.innerHTML = `❌ <b>Gagal!</b> Jarak ${currentDist.toFixed(1)}m. (Maks radius ${selectedLoc.radius}m)`;
-                            document.getElementById('camera-card').style.display = 'none';
-                        }
-                    }, 
-                    (err) => {
-                        locStatus.className = 'status-box status-error';
-                        locStatus.textContent = "Error GPS: " + err.message + ". Pastikan izin lokasi diberikan.";
-                    }, 
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                );
+            if (currentDist <= selectedLoc.radius) {
+                statusPill.className = 'status-pill success';
+                statusPill.innerHTML = `✅ <b>Berhasil!</b> Jarak: ${currentDist.toFixed(1)}m.`;
+                document.getElementById('camera-section').style.display = 'block';
+                startCamera();
             } else {
-                alert("Browser tidak mendukung GPS.");
+                statusPill.className = 'status-pill error';
+                statusPill.innerHTML = `❌ <b>Diluar Radius!</b> Jarak: ${currentDist.toFixed(1)}m. (Maks ${selectedLoc.radius}m)`;
             }
-        });
+        }, (err) => {
+            statusPill.className = 'status-pill error';
+            statusPill.textContent = "Error GPS: " + err.message;
+        }, { enableHighAccuracy: true });
+    });
 
-        async function startCamera() {
-            const video = document.getElementById('video');
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user" }, 
-                    audio: false 
-                });
-                video.srcObject = stream;
-            } catch (e) { 
-                alert('Kamera Gagal. Pastikan Anda memberikan izin kamera.'); 
-            }
-        }
+    async function startCamera() {
+        const video = document.getElementById('video');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video.srcObject = stream;
+        } catch (e) { alert('Izin kamera ditolak!'); }
+    }
 
-        function resetCamera() {
-            document.getElementById('photo-preview').style.display = 'none';
-            document.getElementById('camera-container').style.display = 'block';
-        }
+    function resetCamera() {
+        document.getElementById('photo-preview').style.display = 'none';
+        document.getElementById('video').style.display = 'block';
+        document.getElementById('btn-retry').style.display = 'none';
+        document.getElementById('main-actions').style.display = 'grid';
+    }
 
-        async function submitAbsence(type) {
-            
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const sessionData = localStorage.getItem('userSession');
-            
-            if (!sessionData) return alert("Sesi habis, login ulang.");
-            const session = JSON.parse(sessionData);
+    async function submitAbsence(type) {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const session = JSON.parse(localStorage.getItem('userSession') || '{}');
+        const loctArea = document.getElementById('location-select').value;
         
-            // 1. FORMAT JAM (Ganti titik jadi titik dua)
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                            now.getMinutes().toString().padStart(2, '0') + ':' + 
-                            now.getSeconds().toString().padStart(2, '0');
+        if (!session.username) return alert("Sesi habis!");
 
-            // 2. Kita coba ambil dari berbagai kemungkinan nama variabel yang mungkin kamu pakai saat login
-            const idKaryawan = session.empl_number || session.EMPL_NMBR || session.id || session.username;
+        // Capture Frame
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
 
-            // 3. AMBIL NILAI DARI COMBO BOX
-            const loctArea = document.getElementById('location-select').value;
-            
-            const ctx = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
-        
-            // 4. Watermark
-            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-            ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
-            ctx.fillStyle = "white";
-            ctx.font = "bold 20px Inter";
-            ctx.fillText(`STATUS: ${type.toUpperCase()}`, 20, canvas.height - 85);
-            ctx.font = "16px Inter";
-            ctx.fillText(`GPS: ${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}`, 20, canvas.height - 58);
-            ctx.fillText(`RADIUS: ${currentDist.toFixed(1)}m | ${new Date().toLocaleDateString()} ${timeStr}`, 20, canvas.height - 30);
-        
-            document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
-            document.getElementById('photo-preview').style.display = 'block';
-            document.getElementById('camera-container').style.display = 'none';
+        // UI Feedback
+        document.getElementById('photo-preview').src = canvas.toDataURL('image/jpeg');
+        document.getElementById('photo-preview').style.display = 'block';
+        document.getElementById('video').style.display = 'none';
+        document.getElementById('btn-retry').style.display = 'block';
+        document.getElementById('main-actions').style.display = 'none';
 
-            // 5. Ambil data gambar dari Canvas  --> Start membuat image URL          
-            const imageBase64 = canvas.toDataURL('image/jpeg', 0.7); // 0.7 untuk kompresi agar tidak terlalu besar
-            const blob = await (await fetch(imageBase64)).blob(); // Ubah ke file Blob
-        
-            // 6. Buat Nama File Unik
-            const fileName = `${type}_${idKaryawan}_${loctArea}_${timeStr}_${Date.now()}.jpg`;
-            const filePath = `captures/${fileName}`;
-        
-            try {
-                // 7. Upload ke Supabase Storage
-                const { data: uploadData, error: uploadError } = await supabaseClient
-                    .storage
-                    .from('attendance-photos') 
-                    .upload(filePath, blob, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
-        
-                if (uploadError) throw uploadError;
-        
-                // 8. Ambil URL Publik foto tersebut
-                const { data: urlData } = supabaseClient
-                    .storage
-                    .from('attendance-photos')
-                    .getPublicUrl(filePath);
-        
-                const photoUrl = urlData.publicUrl;
-        
-            // 9. PAYLOAD (Sesuaikan nama kolom dengan akhiran X)
+        // Process Upload
+        const blob = await (await fetch(canvas.toDataURL('image/jpeg', 0.7))).blob();
+        const timeStr = new Date().toLocaleTimeString('id-ID').replace(/\./g, ':');
+        const fileName = `IN_${session.username}_${loctArea}_${Date.now()}.jpg`;
+        const filePath = `captures/${fileName}`;
+
+        try {
+            const { data: uploadData, error: upErr } = await supabaseClient.storage.from('attendance-photos').upload(filePath, blob);
+            if (upErr) throw upErr;
+
+            const { data: urlData } = supabaseClient.storage.from('attendance-photos').getPublicUrl(filePath);
+
             const payload = {
-                EMPL_NMBR: idKaryawan,    //session.empl_number,
-                KORX_NAME: session.username, 
-                TRAN_DATE: now.toISOString().split('T')[0],
-                TRAN_TIME: timeStr, // Format HH:mm:ss
+                EMPL_NMBR: session.empl_number || session.id || "admin",
+                KORX_NAME: session.username,
+                TRAN_DATE: new Date().toISOString().split('T')[0],
+                TRAN_TIME: timeStr,
                 TRAN_STAT: type,
-                LANG_GPSX: userCoords.lng, // Tambahkan X jika memang di database ada X
-                LATT_GPSX: userCoords.lat, // Tambahkan X
-                RADS_GPSX: Math.round(currentDist), // Tambahkan X
+                LANG_GPSX: userCoords.lng,
+                LATT_GPSX: userCoords.lat,
+                RADS_GPSX: Math.round(currentDist),
                 DEVC_NAME: navigator.userAgent,
                 LOCT_AREA: loctArea,
-                IMGE_URLX: photoUrl
+                IMGE_URLX: urlData.publicUrl
             };
-        
-            console.log("Mengirim data:", payload); // Cek di console F12
-        
-            try {
-                const { error } = await supabaseClient.from('TH_ATTN01').insert([payload]);
-                if (error) {
-                    alert("Gagal Simpan ke Database: " + error.message);
-                    console.error(error);
-                } else {
-                    alert("Absensi Berhasil Disimpan!");
-                    window.location.href = 'dashboard.html';
-                }
-            } catch (err) {
-                alert("Terjadi kesalahan sistem: " + err.message);
-            }
-        }catch (err) {
-            alert("Gagal: " + err.message);
-            console.error(err);
+
+            const { error: dbErr } = await supabaseClient.from('TH_ATTN01').insert([payload]);
+            if (dbErr) throw dbErr;
+
+            alert("Absensi Berhasil!");
+            window.location.href = 'dashboard.html';
+        } catch (err) {
+            alert("Error: " + err.message);
+            resetCamera();
         }
     }
 
-    // Logic Tambahan untuk UI
     function updateClock() {
         const now = new Date();
         document.getElementById('live-clock').innerText = now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
@@ -513,16 +308,16 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Ambil data session untuk header
-    const session = JSON.parse(localStorage.getItem('userSession') || '{}');
-    if(session.username) {
-        document.getElementById('user-name').innerText = session.username;
-        document.getElementById('user-id').innerText = "ID: " + (session.empl_number || session.id || 'N/A');
-        document.getElementById('user-initial').innerText = session.username.charAt(0).toUpperCase();
-    }        
+    const sess = JSON.parse(localStorage.getItem('userSession') || '{}');
+    if(sess.username) {
+        document.getElementById('user-name').innerText = sess.username;
+        document.getElementById('user-id').innerText = "ID: " + (sess.empl_number || sess.id || 'N/A');
+        document.getElementById('user-initial').innerText = sess.username.charAt(0).toUpperCase();
+    }
 
-        document.getElementById('btn-checkin').addEventListener('click', () => submitAbsence('Check In'));
-        document.getElementById('btn-checkout').addEventListener('click', () => submitAbsence('Check Out'));
-    </script>
+    document.getElementById('btn-checkin').addEventListener('click', () => submitAbsence('Check In'));
+    document.getElementById('btn-checkout').addEventListener('click', () => submitAbsence('Check Out'));
+</script>
+
 </body>
 </html>
