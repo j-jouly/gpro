@@ -390,7 +390,7 @@ async function submitAbsence(type) {
     const sess = JSON.parse(localStorage.getItem('userSession') || '{}');
     if(sess.username) {
         document.getElementById('user-name').innerText = sess.username;
-        document.getElementById('user-id').innerText = "ID: " + (sess.empl_number || sess.id || 'N/A');
+        document.getElementById('user-id').innerText = "ID: " + (sess.emplnmbr || sess.id || 'N/A');
         document.getElementById('user-initial').innerText = sess.username.charAt(0).toUpperCase();
     }
 
