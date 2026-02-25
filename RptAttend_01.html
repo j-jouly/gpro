@@ -235,9 +235,9 @@
             }
         } catch (err) {
             console.error(err);
-            alert("Gagal mengambil data: " + err.message);
+            alert("⛔ Gagal mengambil data: " + err.message);
         } finally {
-            btn.innerText = "Search Data";
+            btn.innerText = "🔎 Search";
             btn.classList.remove('btn-loading');
         }
     }
