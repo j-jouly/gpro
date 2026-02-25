@@ -68,11 +68,11 @@
         }
 
         .btn-search { background: var(--accent-color); }
-        .btn-search:hover { background: #2980b9; transform: translateY(-4px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn-search:hover { background: #2980b9; transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .btn-search:active { transform: translateY(0); }
 
         .btn-back { background: var(--primary-color); }
-        .btn-back:hover { background: #1a252f; transform: translateY(-4px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn-back:hover { background: #1a252f; transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
         .btn-loading { background: #95a5a6; cursor: not-allowed; }
 
@@ -173,7 +173,7 @@
         const btn = document.getElementById('btnSearch');
         const tbody = document.getElementById('attendanceBody');
         
-        btn.innerText = "Loading...";
+        btn.innerText = "⏳ Loading...";
         btn.classList.add('btn-loading');
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">⌛ Mengambil data dari Supabase...</td></tr>';
 
