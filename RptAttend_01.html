@@ -202,9 +202,11 @@
 
             if (start) query = query.gte('TRAN_DATE', start);
             if (end) query = query.lte('TRAN_DATE', end);
-            if (id) query = query.eq('EMPL_NMBR', id);
-            if (eNm) query = query.eq('KORX_NAME', eNm);
-
+            //if (id) query = query.eq('EMPL_NMBR', id);
+            //if (eNm) query = query.eq('KORX_NAME', eNm);
+            if (id) query = query.ilike('EMPL_NMBR', `%${id}%`);
+            if (eNm) query = query.ilike('KORX_NAME', `%${eNm}%`);
+            
             const { data, error } = await query;
             if (error) throw error;
 
