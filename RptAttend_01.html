@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📝Report Attendance</title>
+    <title>Report Attendance - TH_ATTN01</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
-            --secondary-color: #34495e;
             --accent-color: #3498db;
             --success-color: #27ae60;
             --warning-color: #f39c12;
@@ -16,22 +16,14 @@
             --white: #ffffff;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: #edf2f7;
-            color: #333;
-            line-height: 1.6;
             padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             background: var(--white);
             padding: 25px;
@@ -39,263 +31,183 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
 
-        header {
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--light-bg);
-            padding-bottom: 15px;
-        }
-
-        h2 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Area Pencarian / Filter */
+        /* Filter Area */
         .filter-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             background: var(--light-bg);
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             align-items: end;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; color: var(--primary-color); }
+        .form-group input { padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; }
 
-        .form-group label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--secondary-color);
-        }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; }
+        .btn-search { background: var(--accent-color); }
+        .btn-loading { background: #95a5a6; cursor: not-allowed; }
 
-        .form-group input {
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            outline: none;
-            transition: border 0.3s;
-        }
-
-        .form-group input:focus {
-            border-color: var(--accent-color);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-search { background: var(--accent-color); color: white; }
-        .btn-search:hover { background: #2980b9; }
-
-        .btn-reset { background: #95a5a6; color: white; }
-        .btn-reset:hover { background: #7f8c8d; }
-
-        /* Tabel Laporan */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 1000px;
-        }
-
-        thead {
-            background-color: var(--primary-color);
-            color: var(--white);
-        }
-
-        th {
-            padding: 15px 12px;
-            text-align: left;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        tr:nth-child(even) { background-color: #fafafa; }
-        tr:hover { background-color: #f1f7ff; }
-
-        /* Status & Time Formatting */
-        .time-in { color: var(--success-color); font-weight: bold; }
-        .time-out { color: var(--warning-color); font-weight: bold; }
-        .area-tag {
-            background: #e1e8ed;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
+        /* Table */
+        .table-container { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        thead { background: var(--primary-color); color: white; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        tr:hover { background: #f1f7ff; }
 
         /* Image Hover Preview */
-        .img-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
-        .thumb {
-            width: 45px;
-            height: 45px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            display: block;
-        }
-
+        .img-wrapper { position: relative; display: inline-block; }
+        .thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
         .preview-box {
-            display: none;
-            position: absolute;
-            bottom: 55px; /* Di atas foto */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 999;
-            background: white;
-            padding: 5px;
-            border-radius: 8px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-            border: 1px solid var(--border-color);
+            display: none; position: absolute; bottom: 55px; left: 50%;
+            transform: translateX(-50%); z-index: 99; background: white;
+            padding: 5px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
+        .preview-box img { width: 200px; border-radius: 5px; }
+        .img-wrapper:hover .preview-box { display: block; }
 
-        .preview-box img {
-            width: 180px;
-            height: auto;
-            border-radius: 5px;
-            display: block;
-        }
-
-        .img-wrapper:hover .preview-box {
-            display: block;
-        }
-
-        /* Efek Panah di Preview */
-        .preview-box::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -8px;
-            border-width: 8px;
-            border-style: solid;
-            border-color: white transparent transparent transparent;
-        }
+        .status-in { color: var(--success-color); font-weight: bold; }
+        .status-out { color: var(--warning-color); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h2>Attendance Report (TH_ATTN01)</h2>
-    </header>
+    <header><h2>Attendance Report (TH_ATTN01)</h2></header>
 
-    <section class="filter-section">
-        <div class="form-group">
-            <label>Start Date</label>
-            <input type="date" id="startDate">
-        </div>
-        <div class="form-group">
-            <label>End Date</label>
-            <input type="date" id="endDate">
-        </div>
-        <div class="form-group">
-            <label>Employee Code</label>
-            <input type="text" id="emplId" placeholder="EMPL_NMBR">
-        </div>
-        <div class="form-group">
-            <label>Employee Name</label>
-            <input type="text" id="emplName" placeholder="KORX_NAME">
-        </div>
-        <div class="button-group">
-            <button class="btn btn-search" onclick="filterData()">🔎 Search</button>
-            <button class="btn btn-reset" onclick="resetForm()">♻️ Reset</button>
-        </div>
-    </section>
+    <div class="filter-section">
+        <div class="form-group"><label>Start Date</label><input type="date" id="startDate"></div>
+        <div class="form-group"><label>End Date</label><input type="date" id="endDate"></div>
+        <div class="form-group"><label>Employee ID</label><input type="text" id="emplId" placeholder="EMPL_NMBR"></div>
+        <button class="btn btn-search" id="btnSearch" onclick="fetchAttendanceData()">Search Data</button>
+    </div>
 
     <div class="table-container">
-        <table id="attendanceTable">
+        <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Date</th>
-                    <th>Check IN</th>
-                    <th>Check OUT</th>
-                    <th>Area IN</th>
-                    <th>Area OUT</th>
-                    <th>Photo IN</th>
-                    <th>Photo OUT</th>
+                    <th>EMPL_NMBR</th>
+                    <th>NAME</th>
+                    <th>DATE</th>
+                    <th>IN</th>
+                    <th>OUT</th>
+                    <th>AREA IN</th>
+                    <th>AREA OUT</th>
+                    <th>IMG IN</th>
+                    <th>IMG OUT</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>100234</td>
-                    <td>Budi Santoso</td>
-                    <td>25 Feb 2026</td>
-                    <td class="time-in">08:00:10</td>
-                    <td class="time-out">17:05:45</td>
-                    <td><span class="area-tag">Lobby Utama</span></td>
-                    <td><span class="area-tag">Gate Keluar A</span></td>
-                    <td>
-                        <div class="img-wrapper">
-                            <img src="https://via.placeholder.com/150/27ae60/FFFFFF?text=IN" class="thumb">
-                            <div class="preview-box">
-                                <img src="https://via.placeholder.com/300/27ae60/FFFFFF?text=Preview+IN" alt="Photo IN">
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="img-wrapper">
-                            <img src="https://via.placeholder.com/150/e67e22/FFFFFF?text=OUT" class="thumb">
-                            <div class="preview-box">
-                                <img src="https://via.placeholder.com/300/e67e22/FFFFFF?text=Preview+OUT" alt="Photo OUT">
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+            <tbody id="attendanceBody">
+                <tr><td colspan="9" style="text-align:center;">Klik Search untuk memuat data...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    function filterData() {
-        // Logika untuk mengirim filter ke server via AJAX/Fetch
-        const params = {
-            start: document.getElementById('startDate').value,
-            end: document.getElementById('endDate').value,
-            id: document.getElementById('emplId').value,
-            name: document.getElementById('emplName').value
-        };
-        console.log("Filtering data with parameters:", params);
-        alert("Fungsi pencarian aktif. Mengambil data untuk: " + (params.id || 'Semua Karyawan'));
+    // Konfigurasi Supabase
+    const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Gunakan Key Lengkap Anda
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function fetchAttendanceData() {
+        const btn = document.getElementById('btnSearch');
+        const tbody = document.getElementById('attendanceBody');
+        
+        btn.innerText = "Loading...";
+        btn.classList.add('btn-loading');
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Mengambil data dari Supabase...</td></tr>';
+
+        try {
+            // Ambil data mentah dari tabel TH_ATTN01
+            let query = _supabase.from('TH_ATTN01').select('*');
+
+            // Apply Filters (Jika diisi)
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            const id = document.getElementById('emplId').value;
+
+            if (start) query = query.gte('TRAN_DATE', start);
+            if (end) query = query.lte('TRAN_DATE', end);
+            if (id) query = query.eq('EMPL_NMBR', id);
+
+            const { data, error } = await query;
+
+            if (error) throw error;
+
+            // --- PROSES PIVOT (Menggabungkan IN & OUT menjadi 1 baris) ---
+            const groupedData = {};
+
+            data.forEach(row => {
+                const key = `${row.EMPL_NMBR}_${row.TRAN_DATE}`;
+                if (!groupedData[key]) {
+                    groupedData[key] = {
+                        EMPL_NMBR: row.EMPL_NMBR,
+                        KORX_NAME: row.KORX_NAME,
+                        TRAN_DATE: row.TRAN_DATE,
+                        IN_TIME: '-', OUT_TIME: '-',
+                        AREA_IN: '-', AREA_OUT: '-',
+                        IMG_IN: '', IMG_OUT: ''
+                    };
+                }
+
+                if (row.TRAN_STAT === 'IN') {
+                    groupedData[key].IN_TIME = row.TRAN_TIME;
+                    groupedData[key].AREA_IN = row.LOCT_AREA;
+                    groupedData[key].IMG_IN = row.IMGE_URLX;
+                } else {
+                    groupedData[key].OUT_TIME = row.TRAN_TIME;
+                    groupedData[key].AREA_OUT = row.LOCT_AREA;
+                    groupedData[key].IMG_OUT = row.IMGE_URLX;
+                }
+            });
+
+            // --- TAMPILKAN KE TABEL ---
+            tbody.innerHTML = '';
+            const finalRows = Object.values(groupedData);
+
+            if (finalRows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Data tidak ditemukan.</td></tr>';
+            } else {
+                finalRows.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${item.EMPL_NMBR}</td>
+                            <td>${item.KORX_NAME}</td>
+                            <td>${item.TRAN_DATE}</td>
+                            <td class="status-in">${item.IN_TIME}</td>
+                            <td class="status-out">${item.OUT_TIME}</td>
+                            <td>${item.AREA_IN}</td>
+                            <td>${item.AREA_OUT}</td>
+                            <td>${renderImage(item.IMG_IN)}</td>
+                            <td>${renderImage(item.IMG_OUT)}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("Gagal mengambil data: " + err.message);
+        } finally {
+            btn.innerText = "Search Data";
+            btn.classList.remove('btn-loading');
+        }
     }
 
-    function resetForm() {
-        document.querySelectorAll('input').forEach(input => input.value = '');
+    function renderImage(url) {
+        if (!url || url === '') return '-';
+        return `
+            <div class="img-wrapper">
+                <img src="${url}" class="thumb">
+                <div class="preview-box">
+                    <img src="${url}" alt="Preview">
+                </div>
+            </div>
+        `;
     }
 </script>
 
