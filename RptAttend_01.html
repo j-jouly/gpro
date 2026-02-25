@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝Report Attendance</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #edf2f7;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        header {
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--light-bg);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Area Pencarian / Filter */
+        .filter-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--secondary-color);
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-search { background: var(--accent-color); color: white; }
+        .btn-search:hover { background: #2980b9; }
+
+        .btn-reset { background: #95a5a6; color: white; }
+        .btn-reset:hover { background: #7f8c8d; }
+
+        /* Tabel Laporan */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 1000px;
+        }
+
+        thead {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover { background-color: #f1f7ff; }
+
+        /* Status & Time Formatting */
+        .time-in { color: var(--success-color); font-weight: bold; }
+        .time-out { color: var(--warning-color); font-weight: bold; }
+        .area-tag {
+            background: #e1e8ed;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        /* Image Hover Preview */
+        .img-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .thumb {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            display: block;
+        }
+
+        .preview-box {
+            display: none;
+            position: absolute;
+            bottom: 55px; /* Di atas foto */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            background: white;
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-box img {
+            width: 180px;
+            height: auto;
+            border-radius: 5px;
+            display: block;
+        }
+
+        .img-wrapper:hover .preview-box {
+            display: block;
+        }
+
+        /* Efek Panah di Preview */
+        .preview-box::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>Attendance Report (TH_ATTN01)</h2>
+    </header>
+
+    <section class="filter-section">
+        <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" id="startDate">
+        </div>
+        <div class="form-group">
+            <label>End Date</label>
+            <input type="date" id="endDate">
+        </div>
+        <div class="form-group">
+            <label>Employee Code</label>
+            <input type="text" id="emplId" placeholder="EMPL_NMBR">
+        </div>
+        <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="emplName" placeholder="KORX_NAME">
+        </div>
+        <div class="button-group">
+            <button class="btn btn-search" onclick="filterData()">🔎 Search</button>
+            <button class="btn btn-reset" onclick="resetForm()">♻️ Reset</button>
+        </div>
+    </section>
+
+    <div class="table-container">
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Date</th>
+                    <th>Check IN</th>
+                    <th>Check OUT</th>
+                    <th>Area IN</th>
+                    <th>Area OUT</th>
+                    <th>Photo IN</th>
+                    <th>Photo OUT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>100234</td>
+                    <td>Budi Santoso</td>
+                    <td>25 Feb 2026</td>
+                    <td class="time-in">08:00:10</td>
+                    <td class="time-out">17:05:45</td>
+                    <td><span class="area-tag">Lobby Utama</span></td>
+                    <td><span class="area-tag">Gate Keluar A</span></td>
+                    <td>
+                        <div class="img-wrapper">
+                            <img src="https://via.placeholder.com/150/27ae60/FFFFFF?text=IN" class="thumb">
+                            <div class="preview-box">
+                                <img src="https://via.placeholder.com/300/27ae60/FFFFFF?text=Preview+IN" alt="Photo IN">
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="img-wrapper">
+                            <img src="https://via.placeholder.com/150/e67e22/FFFFFF?text=OUT" class="thumb">
+                            <div class="preview-box">
+                                <img src="https://via.placeholder.com/300/e67e22/FFFFFF?text=Preview+OUT" alt="Photo OUT">
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function filterData() {
+        // Logika untuk mengirim filter ke server via AJAX/Fetch
+        const params = {
+            start: document.getElementById('startDate').value,
+            end: document.getElementById('endDate').value,
+            id: document.getElementById('emplId').value,
+            name: document.getElementById('emplName').value
+        };
+        console.log("Filtering data with parameters:", params);
+        alert("Fungsi pencarian aktif. Mengambil data untuk: " + (params.id || 'Semua Karyawan'));
+    }
+
+    function resetForm() {
+        document.querySelectorAll('input').forEach(input => input.value = '');
+    }
+</script>
+
+</body>
+</html>
