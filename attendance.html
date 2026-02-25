@@ -151,8 +151,22 @@
         
         .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn-in { background: var(--success); color: white; }
+        .btn-in:hover {
+	                    transform: translateY(-5px); /* Efek melayang saat kursor di atasnya */
+                        filter: brightness(1.2); /* Lebih terang dikit */
+                        }
+        .btn-in:active {
+                        transform: scale(0.95); /* Efek membal saat diklik */
+                    }
         .btn-out { background: var(--danger); color: white; }
-
+        .btn-out:hover {
+	                    transform: translateY(-5px); /* Efek melayang saat kursor di atasnya */
+                        filter: brightness(1.2); /* Lebih terang dikit */
+                        }
+        .btn-out:active {
+                        transform: scale(0.95); /* Efek membal saat diklik */
+                    }
+        
         .status-pill {
             padding: 12px; border-radius: var(--radius-md);
             font-size: 13px; font-weight: 500; display: none;
