@@ -11,6 +11,7 @@
             --accent-color: #3498db;
             --success-color: #27ae60;
             --warning-color: #f39c12;
+            --danger-color: #e74c3c;
             --light-bg: #f8f9fa;
             --border-color: #dee2e6;
             --white: #ffffff;
@@ -45,10 +46,30 @@
 
         .form-group { display: flex; flex-direction: column; }
         .form-group label { font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; color: var(--primary-color); }
-        .form-group input { padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; }
+        .form-group input { padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; outline: none; }
+        .form-group input:focus { border-color: var(--accent-color); }
 
-        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; }
+        /* Button Styling & Hover Effects */
+        .btn { 
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: white; 
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
         .btn-search { background: var(--accent-color); }
+        .btn-search:hover { background: #2980b9; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn-search:active { transform: translateY(0); }
+
+        .btn-back { background: var(--primary-color); }
+        .btn-back:hover { background: #1a252f; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
         .btn-loading { background: #95a5a6; cursor: not-allowed; }
 
         /* Table */
@@ -60,13 +81,16 @@
 
         /* Image Hover Preview */
         .img-wrapper { position: relative; display: inline-block; }
-        .thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
+        .thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; transition: 0.3s; }
+        .thumb:hover { border-color: var(--accent-color); }
+        
         .preview-box {
             display: none; position: absolute; bottom: 55px; left: 50%;
             transform: translateX(-50%); z-index: 99; background: white;
             padding: 5px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
         }
-        .preview-box img { width: 200px; border-radius: 5px; }
+        .preview-box img { width: 200px; border-radius: 5px; display: block; }
         .img-wrapper:hover .preview-box { display: block; }
 
         .status-in { color: var(--success-color); font-weight: bold; }
@@ -83,6 +107,7 @@
         <div class="form-group"><label>End Date</label><input type="date" id="endDate"></div>
         <div class="form-group"><label>Employee ID</label><input type="text" id="emplId" placeholder="EMPL_NMBR"></div>
         <button class="btn btn-search" id="btnSearch" onclick="fetchAttendanceData()">Search Data</button>
+        <a href="dashboard.html" class="btn btn-back">Back to Dashboard</a>
     </div>
 
     <div class="table-container">
@@ -113,6 +138,16 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Set Default Dates on Load
+    window.onload = function() {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        const today = now.toISOString().split('T')[0];
+        
+        document.getElementById('startDate').value = firstDay;
+        document.getElementById('endDate').value = today;
+    };
+
     async function fetchAttendanceData() {
         const btn = document.getElementById('btnSearch');
         const tbody = document.getElementById('attendanceBody');
@@ -122,10 +157,8 @@
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Mengambil data dari Supabase...</td></tr>';
 
         try {
-            // Ambil data mentah dari tabel TH_ATTN01
             let query = _supabase.from('TH_ATTN01').select('*');
 
-            // Apply Filters (Jika diisi)
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             const id = document.getElementById('emplId').value;
@@ -135,34 +168,24 @@
             if (id) query = query.eq('EMPL_NMBR', id);
 
             const { data, error } = await query;
-
             if (error) throw error;
 
-            // --- PROSES PIVOT (Menggabungkan Check In & Check Out menjadi 1 baris) ---
             const groupedData = {};
             
             data.forEach(row => {
-                // Kunci unik berdasarkan Nomor Karyawan + Tanggal
                 const key = `${row.EMPL_NMBR}_${row.TRAN_DATE}`;
-                
                 if (!groupedData[key]) {
                     groupedData[key] = {
                         EMPL_NMBR: row.EMPL_NMBR,
                         KORX_NAME: row.KORX_NAME,
                         TRAN_DATE: row.TRAN_DATE,
-                        IN_TIME: '-', 
-                        OUT_TIME: '-',
-                        AREA_IN: '-', 
-                        AREA_OUT: '-',
-                        IMG_IN: '', 
-                        IMG_OUT: ''
+                        IN_TIME: '-', OUT_TIME: '-',
+                        AREA_IN: '-', AREA_OUT: '-',
+                        IMG_IN: '', IMG_OUT: ''
                     };
                 }
-            
-                // Perbaikan Mapping berdasarkan Value: "Check In" dan "Check Out"
-                // Gunakan .toLowerCase() untuk menghindari kesalahan huruf besar/kecil
+
                 const status = row.TRAN_STAT ? row.TRAN_STAT.toLowerCase() : "";
-            
                 if (status === 'check in') {
                     groupedData[key].IN_TIME = row.TRAN_TIME;
                     groupedData[key].AREA_IN = row.LOCT_AREA;
@@ -174,7 +197,6 @@
                 }
             });
 
-            // --- TAMPILKAN KE TABEL ---
             tbody.innerHTML = '';
             const finalRows = Object.values(groupedData);
 
@@ -197,7 +219,6 @@
                     `;
                 });
             }
-
         } catch (err) {
             console.error(err);
             alert("Gagal mengambil data: " + err.message);
@@ -219,6 +240,5 @@
         `;
     }
 </script>
-
 </body>
 </html>
