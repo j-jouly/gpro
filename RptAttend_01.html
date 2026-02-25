@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Attendance - TH_ATTN01</title>
+    <title>Report Attendance</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -76,7 +76,7 @@
 <body>
 
 <div class="container">
-    <header><h2>Attendance Report (TH_ATTN01)</h2></header>
+    <header><h2>Attendance Report</h2></header>
 
     <div class="filter-section">
         <div class="form-group"><label>Start Date</label><input type="date" id="startDate"></div>
@@ -138,27 +138,36 @@
 
             if (error) throw error;
 
-            // --- PROSES PIVOT (Menggabungkan IN & OUT menjadi 1 baris) ---
+            // --- PROSES PIVOT (Menggabungkan Check In & Check Out menjadi 1 baris) ---
             const groupedData = {};
-
+            
             data.forEach(row => {
+                // Kunci unik berdasarkan Nomor Karyawan + Tanggal
                 const key = `${row.EMPL_NMBR}_${row.TRAN_DATE}`;
+                
                 if (!groupedData[key]) {
                     groupedData[key] = {
                         EMPL_NMBR: row.EMPL_NMBR,
                         KORX_NAME: row.KORX_NAME,
                         TRAN_DATE: row.TRAN_DATE,
-                        IN_TIME: '-', OUT_TIME: '-',
-                        AREA_IN: '-', AREA_OUT: '-',
-                        IMG_IN: '', IMG_OUT: ''
+                        IN_TIME: '-', 
+                        OUT_TIME: '-',
+                        AREA_IN: '-', 
+                        AREA_OUT: '-',
+                        IMG_IN: '', 
+                        IMG_OUT: ''
                     };
                 }
-
-                if (row.TRAN_STAT === 'IN') {
+            
+                // Perbaikan Mapping berdasarkan Value: "Check In" dan "Check Out"
+                // Gunakan .toLowerCase() untuk menghindari kesalahan huruf besar/kecil
+                const status = row.TRAN_STAT ? row.TRAN_STAT.toLowerCase() : "";
+            
+                if (status === 'check in') {
                     groupedData[key].IN_TIME = row.TRAN_TIME;
                     groupedData[key].AREA_IN = row.LOCT_AREA;
                     groupedData[key].IMG_IN = row.IMGE_URLX;
-                } else {
+                } else if (status === 'check out') {
                     groupedData[key].OUT_TIME = row.TRAN_TIME;
                     groupedData[key].AREA_OUT = row.LOCT_AREA;
                     groupedData[key].IMG_OUT = row.IMGE_URLX;
