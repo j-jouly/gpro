@@ -206,7 +206,9 @@
             //if (eNm) query = query.eq('KORX_NAME', eNm);
             if (id) query = query.ilike('EMPL_NMBR', `%${id}%`);
             if (eNm) query = query.ilike('KORX_NAME', `%${eNm}%`);
-            
+
+            // Tambahkan ini sebelum 'const { data, error } = await query;'
+            query = query.order('TRAN_DATE', { ascending: false }).order('TRAN_TIME', { ascending: false });            
             const { data, error } = await query;
             if (error) throw error;
 
