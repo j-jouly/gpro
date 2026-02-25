@@ -127,10 +127,14 @@
                 <input type="date" id="endDate">
             </div>
             <div class="form-group">
-                <label>🧔 Employee ID</label>
-                <input type="text" id="emplId" placeholder="EMPL_NMBR">
+                <label>🆔 Employee ID</label>
+                <input type="text" id="emplId" placeholder="Employee Number">
             </div>
-            
+            <div class="form-group">
+                <label>🧔 Employee Name</label>
+                <input type="text" id="emplNm" placeholder="Employee Name">
+            </div>   
+        
             <button class="btn btn-search" id="btnSearch" onclick="fetchAttendanceData()">🔎 Search</button>
             <a href="dashboard.html" class="btn btn-back">🏠 Dashboard</a>
     </div>
@@ -194,10 +198,12 @@
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             const id = document.getElementById('emplId').value;
+            const eNm = document.getElementById('emplNm').value;
 
             if (start) query = query.gte('TRAN_DATE', start);
             if (end) query = query.lte('TRAN_DATE', end);
             if (id) query = query.eq('EMPL_NMBR', id);
+            if (eNm) query = query.eq('KORX_NAME', eNm);
 
             const { data, error } = await query;
             if (error) throw error;
