@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Attendance</title>
+    <title>📝Report Attendance</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -108,20 +108,20 @@
 
     <div class="filter-section">
             <div class="form-group">
-                <label>Start Date</label>
+                <label>🗓️ Start Date</label>
                 <input type="date" id="startDate">
             </div>
             <div class="form-group">
-                <label>End Date</label>
+                <label>🗓️ End Date</label>
                 <input type="date" id="endDate">
             </div>
             <div class="form-group">
-                <label>Employee ID</label>
+                <label>🧔 Employee ID</label>
                 <input type="text" id="emplId" placeholder="EMPL_NMBR">
             </div>
             
-            <button class="btn btn-search" id="btnSearch" onclick="fetchAttendanceData()">Search Data</button>
-            <a href="dashboard.html" class="btn btn-back">Back to Dashboard</a>
+            <button class="btn btn-search" id="btnSearch" onclick="fetchAttendanceData()">🔎 Search</button>
+            <a href="dashboard.html" class="btn btn-back">🏠 Dashboard</a>
     </div>
 
     <div class="table-container">
@@ -140,7 +140,7 @@
                 </tr>
             </thead>
             <tbody id="attendanceBody">
-                <tr><td colspan="9" style="text-align:center;">Klik Search untuk memuat data...</td></tr>
+                <tr><td colspan="9" style="text-align:center;">⏳ Klik Search untuk memuat data...</td></tr>
             </tbody>
         </table>
     </div>
