@@ -155,7 +155,14 @@
     // Set Default Dates on Load
     window.onload = function() {
         const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        //const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        // Set ke tanggal 1, jam 00:00:00 (Waktu Lokal)
+        const firstDayObj = new Date(now.getFullYear(), now.getMonth(), 1);        
+        // Format ke YYYY-MM-DD secara manual agar tetap di zona waktu lokal
+        const year = firstDayObj.getFullYear();
+        const month = String(firstDayObj.getMonth() + 1).padStart(2, '0');
+        const day = String(firstDayObj.getDate()).padStart(2, '0');
+        const firstDay = `${year}-${month}-${day}`;
         const today = now.toISOString().split('T')[0];
         
         document.getElementById('startDate').value = firstDay;
@@ -168,7 +175,7 @@
         
         btn.innerText = "Loading...";
         btn.classList.add('btn-loading');
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Mengambil data dari Supabase...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">⌛ Mengambil data dari Supabase...</td></tr>';
 
         try {
             let query = _supabase.from('TH_ATTN01').select('*');
