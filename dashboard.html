@@ -6,7 +6,7 @@
     <title>Dashboard | Sistem Karyawan</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <!--
     <style>
         :root {
             --primary: #2563eb;
@@ -180,6 +180,201 @@
             .welcome-text h2 { font-size: 20px; }
         }
     </style>
+    -->
+
+    <style>
+        :root {
+            /* Palette Dark Dashboard */
+            --primary: #3b82f6;
+            --bg-dark: #0f172a;      /* Deep Navy Black */
+            --card-dark: #1e293b;    /* Slate Card */
+            --text-main: #f8fafc;    /* White Slate */
+            --text-muted: #94a3b8;   /* Muted Grey */
+            --border: rgba(255, 255, 255, 0.08);
+            
+            /* Accent Colors */
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #0ea5e9;
+            --purple: #a855f7;
+            --orange: #f97316;
+            
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at top left, #1e293b, #0f172a);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Header Section --- */
+        .header {
+            background: var(--card-dark);
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .welcome-text h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -0.5px;
+        }
+
+        .welcome-text p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-logout:hover {
+            background: var(--danger);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        /* --- Grid Section --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .menu-card {
+            background: var(--card-dark);
+            padding: 28px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Glare effect on hover */
+        .menu-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            transition: 0.5s;
+        }
+
+        .menu-card:hover::after { left: 100%; }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 5px; height: 100%;
+            background: var(--primary);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 4px;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-card:hover .icon-box {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .menu-card h3 {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .menu-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* --- Dark Theme Icon Backgrounds --- */
+        .icon-profile { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .icon-attendance { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+        .icon-reports { background: rgba(14, 165, 233, 0.15); color: #38bdf8; }
+        .icon-master { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+        .icon-leave { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+        .icon-overtime { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+        /* Card Side Border Colors */
+        .card-profile::before { background: var(--primary); }
+        .card-attendance::before { background: var(--danger); }
+        .card-reports::before { background: var(--info); }
+        .card-master::before { background: var(--orange); }
+        .card-leave::before { background: var(--purple); }
+        .card-overtime::before { background: var(--warning); }
+
+        @media (max-width: 640px) {
+            .header { flex-direction: column; text-align: center; gap: 20px; }
+        }
+    </style>
+    
 </head>
 <body>
 
