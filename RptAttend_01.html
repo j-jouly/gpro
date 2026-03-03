@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📝Report Attendance</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!--
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -102,6 +103,172 @@
         .status-out { color: var(--warning-color); font-weight: bold; }
         .duration-cell { font-weight: bold; color: var(--primary-color); background: #f0f4f8; text-align: center; }
     </style>
+    -->
+
+<style>
+        :root {
+            /* Palette Dark Report */
+            --primary-color: #1e293b;   /* Slate Darker */
+            --accent-color: #3b82f6;    /* Electric Blue */
+            --success-color: #4ade80;   /* Light Green */
+            --warning-color: #fbbf24;   /* Amber */
+            --danger-color: #f87171;    /* Coral Red */
+            --bg-body: #0f172a;         /* Deep Navy */
+            --card-bg: #1e293b;         /* Slate Card */
+            --light-bg: #334155;        /* Filter Section Bg */
+            --border-color: rgba(255, 255, 255, 0.1);
+            --white: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body { 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            background-color: var(--bg-body); 
+            background-image: radial-gradient(circle at top, #1e293b, #0f172a);
+            color: var(--white);
+            padding: 20px; 
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Filter Section - Glassmorphism style */
+        .filter-section { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            background: var(--light-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin-bottom: 25px; 
+            align-items: flex-end; 
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group { display: flex; flex-direction: column; flex: 1; min-width: 180px;}
+        .form-group label { font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; color: var(--accent-color); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .form-group input { 
+            padding: 10px; 
+            background: var(--bg-body);
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            outline: none; 
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Button - Tetap dengan Efek Bounce Kebanggaan Bos */
+        .btn { 
+            height: 40px; padding: 0 25px; border: none; 
+            border-radius: 10px; 
+            cursor: pointer; font-weight: 600; color: white; text-decoration: none;
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 0.85rem; letter-spacing: 0.5px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn-search { background: var(--accent-color); }
+        .btn-search:hover { 
+            background: #2563eb; transform: translateY(-3px); 
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); 
+        }
+
+        .btn-back { background: #475569; }
+        .btn-back:hover { 
+            background: #64748b; transform: translateY(-3px); 
+            box-shadow: 0 8px 20px rgba(100, 116, 139, 0.4); 
+        }
+
+        .btn:active { transform: scale(0.9); }
+
+        /* Table Styling - Dark Carbon */
+        .table-container { 
+            overflow-x: auto; 
+            border: 1px solid var(--border-color); 
+            border-radius: 12px; 
+            background: #1a2233;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        
+        thead { 
+            background: #0f172a; /* Lebih gelap dari body */
+            color: var(--accent-color); 
+        }
+
+        th { 
+            padding: 15px; 
+            text-align: left; 
+            border-bottom: 2px solid var(--border-color); 
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        td { 
+            padding: 14px 15px; 
+            border-bottom: 1px solid var(--border-color); 
+            color: var(--text-muted);
+            white-space: nowrap; 
+        }
+
+        /* Hover Baris: Tulisan jadi Putih Terang & Background Slate */
+        tr:hover {
+            background-color: #2d3748 !important; 
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        tr:hover td {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        
+        /* Image & Preview Box */
+        .img-wrapper { position: relative; display: inline-block; }
+        .thumb { 
+            width: 45px; height: 45px; object-fit: cover; 
+            border-radius: 8px; border: 1px solid var(--border-color); 
+        }
+        
+        .preview-box { 
+            display: none; position: absolute; bottom: 55px; left: 50%; 
+            transform: translateX(-50%); z-index: 99; 
+            background: var(--card-bg); padding: 8px; 
+            border-radius: 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); 
+            border: 1px solid var(--accent-color); 
+        }
+        .preview-box img { width: 220px; border-radius: 8px; display: block; }
+        .img-wrapper:hover .preview-box { display: block; }
+
+        /* Status & Cells */
+        .status-in { color: var(--success-color); font-weight: bold; }
+        .status-out { color: var(--warning-color); font-weight: bold; }
+        
+        .duration-cell { 
+            font-weight: 800; 
+            color: var(--white); 
+            background: rgba(59, 130, 246, 0.1); /* Soft glow blue */
+            text-align: center; 
+            border-radius: 4px;
+        }
+    </style>
+    
 </head>
 <body>
 
