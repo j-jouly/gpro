@@ -25,12 +25,64 @@
         .form-group label { font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; color: var(--primary-color); }
         .form-group input { padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; outline: none; }
         
+        /*
         .btn { height: 38px; padding: 0 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 0.85rem; }
         .btn:active { transform: scale(0.95); }
         .btn-search { background: var(--accent-color); }
         .btn-back { background: var(--primary-color); }
         .btn-loading { background: #95a5a6; cursor: not-allowed; }
+        */
+        /* Penyeragaman Button dengan Efek Bounce & Glow */
+        .btn { 
+            height: 38px; 
+            padding: 0 25px; 
+            border: none; 
+            border-radius: 8px; /* Lebih rounded biar modern */
+            cursor: pointer; 
+            font-weight: 600; 
+            color: white; 
+            text-decoration: none;
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Kunci efek bounce */
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Shadow halus awal */
+        }
 
+        /* Efek Hover: Terangkat dan Glowing */
+        .btn-search:hover { 
+            background: #2980b9; 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 15px rgba(52, 152, 219, 0.4); 
+        }
+
+        .btn-back:hover { 
+            background: #1a252f; 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 15px rgba(44, 62, 80, 0.4); 
+        }
+
+        /* Efek Bounce pas di Klik (Mantul) */
+        .btn:active {
+            transform: scale(0.9); /* Mengecil dikit pas ditekan */
+        }
+
+        /* Tombol Search warna Biru */
+        .btn-search { background: var(--accent-color); }
+
+        /* Tombol Back warna Gelap */
+        .btn-back { background: var(--primary-color); }
+
+        /* Loading state */
+        .btn-loading { 
+            background: #95a5a6 !important; 
+            cursor: not-allowed; 
+            transform: none !important; 
+            box-shadow: none !important; 
+        }
+        
         .table-container { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         thead { background: var(--primary-color); color: white; }
