@@ -252,59 +252,21 @@
             if (finalRows.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Data tidak ditemukan.</td></tr>';
             } else {
-                    finalRows.forEach(item => {
-                        // 1. Inisialisasi Durasi
-                        let durationStr = '-';
-                        
-                        // 2. Ambil data dengan proteksi (biar nggak error kalau null)
-                        const inTime = item.IN_TIME || '-';
-                        const outTime = item.OUT_TIME || '-';
-                        const hasIn = inTime !== '-';
-                        const hasOut = outTime !== '-';
-                    
-                        // 3. Logika Kalkulasi (Hanya jalan kalau IN dan OUT ada)
-                        if (hasIn && hasOut) {
-                            try {
-                                const inParts = inTime.split(':');
-                                const outParts = outTime.split(':');
-                    
-                                if (inParts.length >= 2 && outParts.length >= 2) {
-                                    const totalMinIn = (parseInt(inParts[0]) * 60) + parseInt(inParts[1]);
-                                    const totalMinOut = (parseInt(outParts[0]) * 60) + parseInt(outParts[1]);
-                                    let diffMin = totalMinOut - totalMinIn;
-                    
-                                    if (diffMin >= 0) {
-                                        const hours = Math.floor(diffMin / 60);
-                                        const minutes = diffMin % 60;
-                                        durationStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-                                    } else {
-                                        durationStr = "Out < In";
-                                    }
-                                }
-                            } catch (err) {
-                                console.error("Gagal hitung durasi untuk:", item.EMPL_NMBR, err);
-                                durationStr = "Error";
-                            }
-                        }
-                    
-                        // 4. Render ke Tabel (Pake variabel lokal biar aman)
-                        const htmlRow = `
-                            <tr>
-                                <td>${item.EMPL_NMBR || '-'}</td>
-                                <td>${item.KORX_NAME || '-'}</td>
-                                <td>${item.TRAN_DATE || '-'}</td>
-                                <td class="status-in">${inTime}</td>
-                                <td class="status-out">${outTime}</td>
-                                <td style="font-weight:bold; color:var(--primary-color);">${durationStr}</td>
-                                <td>${item.AREA_IN || '-'}</td>
-                                <td>${item.AREA_OUT || '-'}</td>
-                                <td>${renderImage(item.IMG_IN)}</td>
-                                <td>${renderImage(item.IMG_OUT)}</td>
-                            </tr>
-                        `;
-                        
-                        tbody.innerHTML += htmlRow;
-                    });
+                finalRows.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${item.EMPL_NMBR}</td>
+                            <td>${item.KORX_NAME}</td>
+                            <td>${item.TRAN_DATE}</td>
+                            <td class="status-in">${item.IN_TIME}</td>
+                            <td class="status-out">${item.OUT_TIME}</td>
+                            <td>${item.AREA_IN}</td>
+                            <td>${item.AREA_OUT}</td>
+                            <td>${renderImage(item.IMG_IN)}</td>
+                            <td>${renderImage(item.IMG_OUT)}</td>
+                        </tr>
+                    `;
+                });
             }
         } catch (err) {
             console.error(err);
