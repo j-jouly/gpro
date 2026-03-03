@@ -252,65 +252,59 @@
             if (finalRows.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Data tidak ditemukan.</td></tr>';
             } else {
-                finalRows.forEach(item => {
-
-                    // --- LOGIKA DINAMIS TANPA HARDCODE ---
-                    let durationStr = '-';
+                    finalRows.forEach(item => {
+                        // 1. Inisialisasi Durasi
+                        let durationStr = '-';
+                        
+                        // 2. Ambil data dengan proteksi (biar nggak error kalau null)
+                        const inTime = item.IN_TIME || '-';
+                        const outTime = item.OUT_TIME || '-';
+                        const hasIn = inTime !== '-';
+                        const hasOut = outTime !== '-';
                     
-                    // 1. Validasi: Pastikan IN dan OUT ada isinya dan bukan strip
-                        const hasIn = item.IN_TIME && item.IN_TIME !== '-';
-                        const hasOut = item.OUT_TIME && item.OUT_TIME !== '-';
-                    
+                        // 3. Logika Kalkulasi (Hanya jalan kalau IN dan OUT ada)
                         if (hasIn && hasOut) {
                             try {
-                                // 2. Pecah string waktu (Contoh: "08:00:15")
-                                const inParts = item.IN_TIME.split(':');
-                                const outParts = item.OUT_TIME.split(':');
+                                const inParts = inTime.split(':');
+                                const outParts = outTime.split(':');
                     
                                 if (inParts.length >= 2 && outParts.length >= 2) {
-                                    // Ambil jam dan menit saja (detik opsional)
-                                    const hIn = parseInt(inParts[0]);
-                                    const mIn = parseInt(inParts[1]);
-                                    const hOut = parseInt(outParts[0]);
-                                    const mOut = parseInt(outParts[1]);
-                    
-                                    // 3. Hitung total menit dari jam 00:00
-                                    const totalMinIn = (hIn * 60) + mIn;
-                                    const totalMinOut = (hOut * 60) + mOut;
-                    
-                                    // 4. Selisih menit
+                                    const totalMinIn = (parseInt(inParts[0]) * 60) + parseInt(inParts[1]);
+                                    const totalMinOut = (parseInt(outParts[0]) * 60) + parseInt(outParts[1]);
                                     let diffMin = totalMinOut - totalMinIn;
                     
                                     if (diffMin >= 0) {
                                         const hours = Math.floor(diffMin / 60);
                                         const minutes = diffMin % 60;
-                                        // Format Simetris HH:mm
                                         durationStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
                                     } else {
-                                        durationStr = "Check Out < In";
+                                        durationStr = "Out < In";
                                     }
                                 }
                             } catch (err) {
-                                console.error("Gagal hitung baris:", item.EMPL_NMBR, err);
-                                durationStr = "Error Calc";
+                                console.error("Gagal hitung durasi untuk:", item.EMPL_NMBR, err);
+                                durationStr = "Error";
                             }
                         }
                     
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${item.EMPL_NMBR}</td>
-                            <td>${item.KORX_NAME}</td>
-                            <td>${item.TRAN_DATE}</td>
-                            <td class="status-in">${item.IN_TIME}</td>
-                            <td class="status-out">${item.OUT_TIME}</td>
-                            <td style="font-weight:bold; color:var(--primary-color);">${durationStr}</td>
-                            <td>${item.AREA_IN}</td>
-                            <td>${item.AREA_OUT}</td>
-                            <td>${renderImage(item.IMG_IN)}</td>
-                            <td>${renderImage(item.IMG_OUT)}</td>
-                        </tr>
-                    `;
-                });
+                        // 4. Render ke Tabel (Pake variabel lokal biar aman)
+                        const htmlRow = `
+                            <tr>
+                                <td>${item.EMPL_NMBR || '-'}</td>
+                                <td>${item.KORX_NAME || '-'}</td>
+                                <td>${item.TRAN_DATE || '-'}</td>
+                                <td class="status-in">${inTime}</td>
+                                <td class="status-out">${outTime}</td>
+                                <td style="font-weight:bold; color:var(--primary-color);">${durationStr}</td>
+                                <td>${item.AREA_IN || '-'}</td>
+                                <td>${item.AREA_OUT || '-'}</td>
+                                <td>${renderImage(item.IMG_IN)}</td>
+                                <td>${renderImage(item.IMG_OUT)}</td>
+                            </tr>
+                        `;
+                        
+                        tbody.innerHTML += htmlRow;
+                    });
             }
         } catch (err) {
             console.error(err);
