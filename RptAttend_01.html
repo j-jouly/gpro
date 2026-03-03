@@ -153,6 +153,7 @@
                     <th>DATE</th>
                     <th>IN</th>
                     <th>OUT</th>
+                    <th>DURASI</th>                    
                     <th>AREA IN</th>
                     <th>AREA OUT</th>
                     <th>IMG IN</th>
@@ -227,6 +228,7 @@
                         KORX_NAME: row.KORX_NAME,
                         TRAN_DATE: row.TRAN_DATE,
                         IN_TIME: '-', OUT_TIME: '-',
+                        null,
                         AREA_IN: '-', AREA_OUT: '-',
                         IMG_IN: '', IMG_OUT: ''
                     };
@@ -251,6 +253,33 @@
                 tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Data tidak ditemukan.</td></tr>';
             } else {
                 finalRows.forEach(item => {
+
+                    // --- LOGIKA DINAMIS TANPA HARDCODE ---
+                    let durationStr = '-';
+                    
+                    // Pastikan IN dan OUT ada isinya
+                    if (item.IN_TIME !== '-' && item.OUT_TIME !== '-') {
+                        // Gabungkan Tanggal + Jam dari data asli tabel
+                        const start = new Date(`${item.TRAN_DATE}T${item.IN_TIME}`);
+                        const end = new Date(`${item.TRAN_DATE}T${item.OUT_TIME}`);
+                        
+                        // Hitung selisih dalam milidetik
+                        let diffMs = end - start;
+                
+                        // Jika hasilnya positif (Check-out setelah Check-in)
+                        if (diffMs >= 0) {
+                            let totalSeconds = Math.floor(diffMs / 1000);
+                            let hours = Math.floor(totalSeconds / 3600);
+                            let minutes = Math.floor((totalSeconds % 3600) / 60);
+                            
+                            // Format simetris HH:mm
+                            durationStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                        } else {
+                            // Kasus khusus: Kalau jam OUT lebih kecil dari jam IN (mungkin kerja shift malam)
+                            durationStr = "Check Data"; 
+                        }
+                    }
+                    
                     tbody.innerHTML += `
                         <tr>
                             <td>${item.EMPL_NMBR}</td>
@@ -258,6 +287,7 @@
                             <td>${item.TRAN_DATE}</td>
                             <td class="status-in">${item.IN_TIME}</td>
                             <td class="status-out">${item.OUT_TIME}</td>
+                            <td style="font-weight:bold; color:var(--primary-color);">${durationStr}</td>
                             <td>${item.AREA_IN}</td>
                             <td>${item.AREA_OUT}</td>
                             <td>${renderImage(item.IMG_IN)}</td>
