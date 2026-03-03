@@ -257,26 +257,32 @@
                     // --- LOGIKA DINAMIS TANPA HARDCODE ---
                     let durationStr = '-';
                     
-                    // Pastikan IN dan OUT ada isinya
-                    if (item.IN_TIME !== '-' && item.OUT_TIME !== '-') {
-                        // Gabungkan Tanggal + Jam dari data asli tabel
-                        const start = new Date(`${item.TRAN_DATE}T${item.IN_TIME}`);
-                        const end = new Date(`${item.TRAN_DATE}T${item.OUT_TIME}`);
-                        
-                        // Hitung selisih dalam milidetik
-                        let diffMs = end - start;
+                    // Cek apakah IN dan OUT ada isinya (bukan '-' atau null)
+                    if (item.IN_TIME && item.OUT_TIME && item.IN_TIME !== '-' && item.OUT_TIME !== '-') {
+                        try {
+                            // Pecah jam:menit:detik
+                            const [hIn, mIn, sIn] = item.IN_TIME.split(':').map(Number);
+                            const [hOut, mOut, sOut] = item.OUT_TIME.split(':').map(Number);
                 
-                        // Jika hasilnya positif (Check-out setelah Check-in)
-                        if (diffMs >= 0) {
-                            let totalSeconds = Math.floor(diffMs / 1000);
-                            let hours = Math.floor(totalSeconds / 3600);
-                            let minutes = Math.floor((totalSeconds % 3600) / 60);
-                            
-                            // Format simetris HH:mm
-                            durationStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-                        } else {
-                            // Kasus khusus: Kalau jam OUT lebih kecil dari jam IN (mungkin kerja shift malam)
-                            durationStr = "Check Data"; 
+                            // Buat objek Date berdasarkan jam tersebut (tanggalnya sama)
+                            const dIn = new Date();
+                            dIn.setHours(hIn, mIn, sIn || 0);
+                
+                            const dOut = new Date();
+                            dOut.setHours(hOut, mOut, sOut || 0);
+                
+                            let diffMs = dOut - dIn;
+                
+                            if (diffMs >= 0) {
+                                let diffHrs = Math.floor(diffMs / 3600000);
+                                let diffMins = Math.floor((diffMs % 3600000) / 60000);
+                                durationStr = `${String(diffHrs).padStart(2, '0')}:${String(diffMins).padStart(2, '0')}`;
+                            } else {
+                                durationStr = "Check Out < In"; // Kasus input salah
+                            }
+                        } catch (e) {
+                            console.error("Error Hitung Durasi:", e);
+                            durationStr = "Error";
                         }
                     }
                     
