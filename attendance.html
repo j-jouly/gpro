@@ -231,6 +231,29 @@
 </div>
 
 <script>
+
+	// 1. Protection Logic - Letakkan di paling atas <script>
+	const sessionData = localStorage.getItem('userSession');
+	
+	if (!sessionData) {
+	    // Pakai path lengkap atau relatif yang konsisten
+	    window.location.replace('index.html'); 
+	} else {
+	    try {
+	        const user = JSON.parse(sessionData);
+	        
+	        // Pastikan elemen ID ini ada di HTML Bos
+	        const displayEl = document.getElementById('userNameDisplay');
+	        if (displayEl) {
+	            displayEl.innerText = `Selamat Datang, ${user.korxname || 'Bos'}!`;
+	        }
+	    } catch (e) {
+	        // Jika data di localStorage korup/bukan JSON, tendang juga
+	        localStorage.removeItem('userSession');
+	        window.location.replace('index.html');
+	    }
+	}
+	
     const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
