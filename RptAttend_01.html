@@ -333,38 +333,32 @@
         document.getElementById('endDate').value = now.toISOString().split('T')[0];
     };
 
-    async function fetchAttendanceData() {
+
+async function fetchAttendanceData() {
         const btn = document.getElementById('btnSearch');
         const tbody = document.getElementById('attendanceBody');
         
-        // Visual Feedback Standar Tinggi
         btn.innerText = "⏳ Loading...";
         btn.classList.add('btn-loading');
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Mensinkronisasi Data DATE_TIME (Real-Time)...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Menghitung durasi presisi (UTC Neutral)...</td></tr>';
 
         try {
             let query = _supabase.from('TH_ATTN01').select('*');
-            
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             const id = document.getElementById('emplId').value;
             const eNm = document.getElementById('emplNm').value;
 
-            // Filter tetap mengacu pada TRAN_DATE
             if (start) query = query.gte('TRAN_DATE', start);
-            
-            // Tambahkan H+1 di query supaya Check Out subuh tidak hilang dari hasil fetch
             if (end) {
                 let nextDay = new Date(end);
                 nextDay.setDate(nextDay.getDate() + 1);
-                const endExtended = nextDay.toISOString().split('T')[0];
-                query = query.lte('TRAN_DATE', endExtended);
+                query = query.lte('TRAN_DATE', nextDay.toISOString().split('T')[0]);
             }
 
             if (id) query = query.ilike('EMPL_NMBR', `%${id}%`);
             if (eNm) query = query.ilike('KORX_NAME', `%${eNm}%`);
 
-            // Urutkan berdasarkan DATE_TIME ASC untuk pairing In-Out yang akurat
             query = query.order('DATE_TIME', { ascending: true });            
             
             const { data, error } = await query;
@@ -378,7 +372,6 @@
                 const userKey = row.EMPL_NMBR;
 
                 if (status === 'check in') {
-                    // Pakai kombinasi ID + Timestamp sebagai key unik
                     const sessionKey = `${userKey}_${row.DATE_TIME}`;
                     groupedData[sessionKey] = {
                         EMPL_NMBR: row.EMPL_NMBR,
@@ -394,7 +387,6 @@
                         IMG_OUT: ''
                     };
                     activeSessions[userKey] = sessionKey;
-
                 } else if (status === 'check out') {
                     const openKey = activeSessions[userKey];
                     if (openKey && groupedData[openKey]) {
@@ -408,9 +400,6 @@
             });
 
             tbody.innerHTML = '';
-            
-            // Filter kembali agar hanya menampilkan IN_DATE yang sesuai range pilihan Bos
-            // Lalu balik (reverse) agar data terbaru di atas
             const finalRows = Object.values(groupedData)
                 .filter(item => !end || item.IN_DATE <= end)
                 .reverse();
@@ -421,20 +410,17 @@
                 finalRows.forEach(item => {
                     let durationStr = '-';
                     
-                    // KALKULASI REAL TIME (Presisi Detik)
                     if (item.IN_DT && item.OUT_DT) {
-                        const startDT = new Date(item.IN_DT);
-                        const endDT = new Date(item.OUT_DT);
+                        // FIX: Paksa hitung selisih milidetik murni tanpa konversi zona waktu lokal
+                        const startMs = Date.parse(item.IN_DT);
+                        const endMs = Date.parse(item.OUT_DT);
                         
-                        const diffMs = endDT - startDT;
+                        const diffMs = endMs - startMs;
 
                         if (diffMs > 0) {
-                            // Konversi ke total detik agar tidak ada sisa menit yang salah hitung
                             const totalSeconds = Math.floor(diffMs / 1000);
                             const hrs = Math.floor(totalSeconds / 3600);
                             const mins = Math.floor((totalSeconds % 3600) / 60);
-                            
-                            // Hasil Real: HH:mm
                             durationStr = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
                         } else {
                             durationStr = "00:00";
@@ -458,13 +444,13 @@
                 });
             }
         } catch (err) {
-            console.error("Trace Error:", err);
-            alert("⛔ Bos, ada masalah teknis: " + err.message);
+            alert("⛔ Error: " + err.message);
         } finally {
             btn.innerText = "🔎 Search";
             btn.classList.remove('btn-loading');
         }
     }
+    
     
     function renderImage(url) {
         if (!url || url === '') return '-';
