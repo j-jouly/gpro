@@ -334,13 +334,13 @@
     };
 
 
-async function fetchAttendanceData() {
+    async function fetchAttendanceData() {
         const btn = document.getElementById('btnSearch');
         const tbody = document.getElementById('attendanceBody');
         
         btn.innerText = "⏳ Loading...";
         btn.classList.add('btn-loading');
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Menghitung durasi presisi (UTC Neutral)...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Audit data DATE_TIME...</td></tr>';
 
         try {
             let query = _supabase.from('TH_ATTN01').select('*');
@@ -380,7 +380,8 @@ async function fetchAttendanceData() {
                         IN_TIME: row.TRAN_TIME,
                         IN_DT: row.DATE_TIME, 
                         OUT_TIME: '-',
-                        OUT_DT: null,         
+                        OUT_DT: null,
+                        OUT_DATE_REAL: '', // Untuk debug
                         AREA_IN: row.LOCT_AREA || '-',
                         AREA_OUT: '-',
                         IMG_IN: row.IMGE_URLX || '',
@@ -391,7 +392,8 @@ async function fetchAttendanceData() {
                     const openKey = activeSessions[userKey];
                     if (openKey && groupedData[openKey]) {
                         groupedData[openKey].OUT_TIME = row.TRAN_TIME;
-                        groupedData[openKey].OUT_DT = row.DATE_TIME; 
+                        groupedData[openKey].OUT_DT = row.DATE_TIME;
+                        groupedData[openKey].OUT_DATE_REAL = row.TRAN_DATE;
                         groupedData[openKey].AREA_OUT = row.LOCT_AREA || '-';
                         groupedData[openKey].IMG_OUT = row.IMGE_URLX || '';
                         delete activeSessions[userKey];
@@ -411,19 +413,18 @@ async function fetchAttendanceData() {
                     let durationStr = '-';
                     
                     if (item.IN_DT && item.OUT_DT) {
-                        // FIX: Paksa hitung selisih milidetik murni tanpa konversi zona waktu lokal
-                        const startMs = Date.parse(item.IN_DT);
-                        const endMs = Date.parse(item.OUT_DT);
+                        const startMs = new Date(item.IN_DT).getTime();
+                        const endMs = new Date(item.OUT_DT).getTime();
                         
                         const diffMs = endMs - startMs;
 
                         if (diffMs > 0) {
-                            const totalSeconds = Math.floor(diffMs / 1000);
-                            const hrs = Math.floor(totalSeconds / 3600);
-                            const mins = Math.floor((totalSeconds % 3600) / 60);
+                            const totalMinutes = Math.floor(diffMs / 60000);
+                            const hrs = Math.floor(totalMinutes / 60);
+                            const mins = totalMinutes % 60;
                             durationStr = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
                         } else {
-                            durationStr = "00:00";
+                            durationStr = "Check Out < In";
                         }
                     }
 
@@ -432,9 +433,9 @@ async function fetchAttendanceData() {
                             <td>${item.EMPL_NMBR}</td>
                             <td>${item.KORX_NAME}</td>
                             <td>${item.IN_DATE}</td>
-                            <td class="status-in">${item.IN_TIME}</td>
-                            <td class="status-out">${item.OUT_TIME}</td>
-                            <td class="duration-cell">${durationStr}</td>
+                            <td class="status-in" title="${item.IN_DT}">${item.IN_TIME}</td>
+                            <td class="status-out" title="${item.OUT_DT}">${item.OUT_TIME}</td>
+                            <td class="duration-cell" style="font-weight:bold; color:#00ff00;">${durationStr}</td>
                             <td>${item.AREA_IN}</td>
                             <td>${item.AREA_OUT}</td>
                             <td>${typeof renderImage === 'function' ? renderImage(item.IMG_IN) : '-'}</td>
