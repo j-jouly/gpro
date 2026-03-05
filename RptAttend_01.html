@@ -337,9 +337,10 @@
         const btn = document.getElementById('btnSearch');
         const tbody = document.getElementById('attendanceBody');
         
+        // Visual Feedback Standar Tinggi
         btn.innerText = "⏳ Loading...";
         btn.classList.add('btn-loading');
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Mensinkronisasi data Real-Time...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Mensinkronisasi Data DATE_TIME (Real-Time)...</td></tr>';
 
         try {
             let query = _supabase.from('TH_ATTN01').select('*');
@@ -349,9 +350,10 @@
             const id = document.getElementById('emplId').value;
             const eNm = document.getElementById('emplNm').value;
 
+            // Filter tetap mengacu pada TRAN_DATE
             if (start) query = query.gte('TRAN_DATE', start);
             
-            // Ambil H+1 agar Check Out subuh tidak terputus
+            // Tambahkan H+1 di query supaya Check Out subuh tidak hilang dari hasil fetch
             if (end) {
                 let nextDay = new Date(end);
                 nextDay.setDate(nextDay.getDate() + 1);
@@ -362,7 +364,7 @@
             if (id) query = query.ilike('EMPL_NMBR', `%${id}%`);
             if (eNm) query = query.ilike('KORX_NAME', `%${eNm}%`);
 
-            // Urutkan kronologis agar pairing In-Out akurat
+            // Urutkan berdasarkan DATE_TIME ASC untuk pairing In-Out yang akurat
             query = query.order('DATE_TIME', { ascending: true });            
             
             const { data, error } = await query;
@@ -376,6 +378,7 @@
                 const userKey = row.EMPL_NMBR;
 
                 if (status === 'check in') {
+                    // Pakai kombinasi ID + Timestamp sebagai key unik
                     const sessionKey = `${userKey}_${row.DATE_TIME}`;
                     groupedData[sessionKey] = {
                         EMPL_NMBR: row.EMPL_NMBR,
@@ -406,7 +409,8 @@
 
             tbody.innerHTML = '';
             
-            // Filter hanya tampilkan yang tanggal masuknya sesuai filter Bos
+            // Filter kembali agar hanya menampilkan IN_DATE yang sesuai range pilihan Bos
+            // Lalu balik (reverse) agar data terbaru di atas
             const finalRows = Object.values(groupedData)
                 .filter(item => !end || item.IN_DATE <= end)
                 .reverse();
@@ -417,6 +421,7 @@
                 finalRows.forEach(item => {
                     let durationStr = '-';
                     
+                    // KALKULASI REAL TIME (Presisi Detik)
                     if (item.IN_DT && item.OUT_DT) {
                         const startDT = new Date(item.IN_DT);
                         const endDT = new Date(item.OUT_DT);
@@ -424,10 +429,12 @@
                         const diffMs = endDT - startDT;
 
                         if (diffMs > 0) {
-                            const totalMin = Math.floor(diffMs / 60000);
-                            const hrs = Math.floor(totalMin / 60);
-                            const mins = totalMin % 60;
-                            // Real Time Format: HH:mm
+                            // Konversi ke total detik agar tidak ada sisa menit yang salah hitung
+                            const totalSeconds = Math.floor(diffMs / 1000);
+                            const hrs = Math.floor(totalSeconds / 3600);
+                            const mins = Math.floor((totalSeconds % 3600) / 60);
+                            
+                            // Hasil Real: HH:mm
                             durationStr = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
                         } else {
                             durationStr = "00:00";
@@ -451,14 +458,14 @@
                 });
             }
         } catch (err) {
-            console.error("Error Trace:", err);
-            alert("⛔ Bos, ada masalah: " + err.message);
+            console.error("Trace Error:", err);
+            alert("⛔ Bos, ada masalah teknis: " + err.message);
         } finally {
             btn.innerText = "🔎 Search";
             btn.classList.remove('btn-loading');
         }
     }
-
+    
     function renderImage(url) {
         if (!url || url === '') return '-';
         return `<div class="img-wrapper"><img src="${url}" class="thumb"><div class="preview-box"><img src="${url}"></div></div>`;
