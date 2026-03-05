@@ -401,18 +401,18 @@
             <p class="signup-link">Masalah login? <a href="#">☎️ Hubungi IT Support</a></p>
         </div>
     </div>
-
+    
     <script>
         // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://bzrycuvpbsxvutqhxowp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cnljdXZwYnN4dnV0cWh4b3dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTk5OTEsImV4cCI6MjA4NjkzNTk5MX0.MI2suZLflcMbc5AbPCRaT7_pT9qQISrsV5dKA63Si8s';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+    
         const loginForm = document.getElementById('loginForm');
         const btnLogin = document.getElementById('btnLogin');
         const btnText = document.getElementById('btnText');
         const messageBox = document.getElementById('messageBox');
-
+    
         function showMessage(msg, type = 'error') {
             messageBox.textContent = msg;
             messageBox.style.display = 'block';
@@ -426,17 +426,17 @@
                 messageBox.style.border = '1px solid #bbf7d0';
             }
         }
-
+    
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             btnLogin.disabled = true;
             btnText.innerHTML = '⏳ Memproses...';
             messageBox.style.display = 'none';
-
+    
             const usernameInput = document.getElementById('email').value;
             const passwordInput = document.getElementById('password').value;
-
+    
             try {
                 const { data, error } = await supabaseClient
                     .from('TH_EMP01M')
@@ -444,32 +444,36 @@
                     .eq('EMPL_UNME', usernameInput)
                     .eq('EMPL_PSWD', passwordInput)
                     .single();
-
+    
                 if (error || !data) {
                     throw new Error('⛔ Username atau Password tidak ditemukan.');
                 }
-
+    
                 showMessage('🔓 Login Berhasil! Mengalihkan...', 'Success');
-                console.log("Data user berhasil ditarik:", data);
                 
-                localStorage.setItem('userSession', JSON.stringify({
+                // --- SIMPAN SESI DENGAN TIMESTAMP (TIME LIMIT START) ---
+                const sessionData = {
                     username: data.EMPL_UNME,
-                    emplnmbr:data.EMPL_NMBR,
-                    korxname:data.EMPL_NAME,
-                    loginTime: new Date().getTime()
-                }));
-
+                    emplnmbr: data.EMPL_NMBR,
+                    korxname: data.EMPL_NAME,
+                    loginTime: new Date().getTime() // Stempel waktu detik ini
+                };
+    
+                localStorage.setItem('userSession', JSON.stringify(sessionData));
+                // -------------------------------------------------------
+    
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    // Pastikan file tujuan sesuai (dashboard atau attendance)
+                    window.location.href = 'attendance.html'; 
                 }, 1500);
-
+    
             } catch (err) {
                 showMessage(err.message, 'error');
                 btnLogin.disabled = false;
                 btnText.innerHTML = 'Masuk ke Sistem';
             }
         });
-
+    
         async function handleSocialLogin(provider) {
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: provider,
@@ -477,6 +481,8 @@
             });
             if (error) showMessage('Gagal login dengan ' + provider, 'error');
         }
+        
     </script>
+    
 </body>
 </html>
