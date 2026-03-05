@@ -337,42 +337,37 @@
         const btn = document.getElementById('btnSearch');
         const tbody = document.getElementById('attendanceBody');
         
-        // Visual Feedback sesuai standar Bos
         btn.innerText = "⏳ Loading...";
         btn.classList.add('btn-loading');
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Sedang sinkronisasi data lintas hari...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Mensinkronisasi data absensi...</td></tr>';
 
         try {
             let query = _supabase.from('TH_ATTN01').select('*');
-            
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             const id = document.getElementById('emplId').value;
             const eNm = document.getElementById('emplNm').value;
 
-            // Filter data
             if (start) query = query.gte('TRAN_DATE', start);
             if (end) query = query.lte('TRAN_DATE', end);
             if (id) query = query.ilike('EMPL_NMBR', `%${id}%`);
             if (eNm) query = query.ilike('KORX_NAME', `%${eNm}%`);
 
-            /* PENTING: Kita urutkan dari yang LAMA ke BARU (ASC) 
-               supaya sistem bisa memasangkan Check In dengan Check Out sesudahnya.
-            */
+            // Tarik data dari yang terlama ke terbaru (ASC) untuk pairing logic
             query = query.order('TRAN_DATE', { ascending: true }).order('TRAN_TIME', { ascending: true });            
             
             const { data, error } = await query;
             if (error) throw error;
 
             const groupedData = {};
-            const activeSessions = {}; // Penampung untuk memasangkan In/Out
+            const activeSessions = {}; 
 
             data.forEach(row => {
-                const status = (row.TRAN_STAT || "").toLowerCase();
+                const status = (row.TRAN_STAT || "").trim().toLowerCase();
                 const userKey = row.EMPL_NMBR;
 
                 if (status === 'check in') {
-                    // Buat sesi unik berdasarkan ID dan Waktu Check In
+                    // Pakai ID + Date + Time sebagai key unik session In
                     const sessionKey = `${userKey}_${row.TRAN_DATE}_${row.TRAN_TIME}`;
                     groupedData[sessionKey] = {
                         EMPL_NMBR: row.EMPL_NMBR,
@@ -381,34 +376,27 @@
                         IN_TIME: row.TRAN_TIME,
                         OUT_DATE: '-',
                         OUT_TIME: '-',
-                        AREA_IN: row.LOCT_AREA,
+                        AREA_IN: row.LOCT_AREA || '-',
                         AREA_OUT: '-',
-                        IMG_IN: row.IMGE_URLX,
+                        IMG_IN: row.IMGE_URLX || '',
                         IMG_OUT: ''
                     };
-                    // Simpan sessionKey sebagai referensi untuk Check Out berikutnya
                     activeSessions[userKey] = sessionKey;
 
                 } else if (status === 'check out') {
-                    // Cari apakah karyawan ini punya Check In yang belum ada Out-nya
                     const openKey = activeSessions[userKey];
                     if (openKey && groupedData[openKey]) {
                         groupedData[openKey].OUT_DATE = row.TRAN_DATE;
                         groupedData[openKey].OUT_TIME = row.TRAN_TIME;
-                        groupedData[openKey].AREA_OUT = row.LOCT_AREA;
-                        groupedData[openKey].IMG_OUT = row.IMGE_URLX;
-                        
-                        // Setelah dipasangkan, hapus dari daftar sesi aktif
+                        groupedData[openKey].AREA_OUT = row.LOCT_AREA || '-';
+                        groupedData[openKey].IMG_OUT = row.IMGE_URLX || '';
                         delete activeSessions[userKey];
                     }
                 }
             });
 
             tbody.innerHTML = '';
-            
-            /* REVERSE: Balik lagi urutannya supaya data TERBARU 
-               muncul di baris paling ATAS tabel Bos.
-            */
+            // Tampilkan data terbaru di atas
             const finalRows = Object.values(groupedData).reverse();
 
             if (finalRows.length === 0) {
@@ -417,28 +405,36 @@
                 finalRows.forEach(item => {
                     let durationStr = '-';
                     
-                    // Kalkulasi Durasi Lintas Hari
                     if (item.IN_TIME !== '-' && item.OUT_TIME !== '-') {
-                        try {
-                            const startDT = new Date(`${item.IN_DATE}T${item.IN_TIME}`);
-                            const endDT = new Date(`${item.OUT_DATE}T${item.OUT_TIME}`);
-                            
-                            const diffMs = endDT - startDT;
-                            
-                            if (diffMs > 0) {
-                                const totalMinutes = Math.floor(diffMs / 60000);
-                                const hrs = Math.floor(totalMinutes / 60);
-                                const mins = totalMinutes % 60;
-                                durationStr = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-                            } else {
-                                durationStr = "Err: Time";
-                            }
-                        } catch (e) {
-                            durationStr = "Error";
+                        // LOGIKA MANUAL MINUTES (Paling aman untuk kolom Date & Time terpisah)
+                        const pIn = item.IN_TIME.split(':');
+                        const pOut = item.OUT_TIME.split(':');
+                        
+                        // Konversi jam & menit ke total menit
+                        let minIn = (parseInt(pIn[0]) * 60) + parseInt(pIn[1]);
+                        let minOut = (parseInt(pOut[0]) * 60) + parseInt(pOut[1]);
+
+                        // HITUNG SELISIH HARI
+                        const dIn = new Date(item.IN_DATE);
+                        const dOut = new Date(item.OUT_DATE);
+                        const dayDiff = Math.round((dOut - dIn) / (1000 * 60 * 60 * 24));
+
+                        // Jika beda hari (misal shift malam), tambahkan 1440 menit (24 jam) per hari
+                        if (dayDiff > 0) {
+                            minOut += (dayDiff * 1440);
+                        }
+
+                        const totalDiff = minOut - minIn;
+
+                        if (totalDiff >= 0) {
+                            const hrs = Math.floor(totalDiff / 60);
+                            const mins = totalDiff % 60;
+                            durationStr = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+                        } else {
+                            durationStr = "Err: Time";
                         }
                     }
 
-                    // Render baris tabel dengan Black Theme style
                     tbody.innerHTML += `
                         <tr>
                             <td>${item.EMPL_NMBR}</td>
@@ -449,17 +445,16 @@
                             <td class="duration-cell">${durationStr}</td>
                             <td>${item.AREA_IN}</td>
                             <td>${item.AREA_OUT}</td>
-                            <td>${renderImage(item.IMG_IN)}</td>
-                            <td>${renderImage(item.IMG_OUT)}</td>
+                            <td>${typeof renderImage === 'function' ? renderImage(item.IMG_IN) : '-'}</td>
+                            <td>${typeof renderImage === 'function' ? renderImage(item.IMG_OUT) : '-'}</td>
                         </tr>
                     `;
                 });
             }
         } catch (err) {
-            console.error("Trace Error:", err);
-            alert("⛔ Bos, ada error: " + err.message);
+            console.error("Detail Error:", err);
+            alert("⛔ Bos, ada masalah: " + err.message);
         } finally {
-            // Kembalikan tombol ke kondisi semula
             btn.innerText = "🔎 Search";
             btn.classList.remove('btn-loading');
         }
