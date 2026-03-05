@@ -339,7 +339,7 @@
         
         btn.innerText = "⏳ Loading...";
         btn.classList.add('btn-loading');
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Mensinkronisasi data dengan kolom DATE_TIME...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Mensinkronisasi data Real-Time...</td></tr>';
 
         try {
             let query = _supabase.from('TH_ATTN01').select('*');
@@ -349,10 +349,9 @@
             const id = document.getElementById('emplId').value;
             const eNm = document.getElementById('emplNm').value;
 
-            // Filter tetap pakai TRAN_DATE agar sesuai input user
             if (start) query = query.gte('TRAN_DATE', start);
             
-            // Tambahkan jangkauan +1 hari di query agar Check Out subuh besoknya ketarik
+            // Ambil H+1 agar Check Out subuh tidak terputus
             if (end) {
                 let nextDay = new Date(end);
                 nextDay.setDate(nextDay.getDate() + 1);
@@ -363,7 +362,7 @@
             if (id) query = query.ilike('EMPL_NMBR', `%${id}%`);
             if (eNm) query = query.ilike('KORX_NAME', `%${eNm}%`);
 
-            // Urutkan berdasarkan DATE_TIME agar kronologisnya sempurna
+            // Urutkan kronologis agar pairing In-Out akurat
             query = query.order('DATE_TIME', { ascending: true });            
             
             const { data, error } = await query;
@@ -377,16 +376,15 @@
                 const userKey = row.EMPL_NMBR;
 
                 if (status === 'check in') {
-                    // Gunakan DATE_TIME sebagai ID unik sesi masuk
                     const sessionKey = `${userKey}_${row.DATE_TIME}`;
                     groupedData[sessionKey] = {
                         EMPL_NMBR: row.EMPL_NMBR,
                         KORX_NAME: row.KORX_NAME,
                         IN_DATE: row.TRAN_DATE,
                         IN_TIME: row.TRAN_TIME,
-                        IN_DT: row.DATE_TIME, // Simpan timestamp masuk
+                        IN_DT: row.DATE_TIME, 
                         OUT_TIME: '-',
-                        OUT_DT: null,         // Tempat simpan timestamp keluar
+                        OUT_DT: null,         
                         AREA_IN: row.LOCT_AREA || '-',
                         AREA_OUT: '-',
                         IMG_IN: row.IMGE_URLX || '',
@@ -398,7 +396,7 @@
                     const openKey = activeSessions[userKey];
                     if (openKey && groupedData[openKey]) {
                         groupedData[openKey].OUT_TIME = row.TRAN_TIME;
-                        groupedData[openKey].OUT_DT = row.DATE_TIME; // Ambil timestamp keluar
+                        groupedData[openKey].OUT_DT = row.DATE_TIME; 
                         groupedData[openKey].AREA_OUT = row.LOCT_AREA || '-';
                         groupedData[openKey].IMG_OUT = row.IMGE_URLX || '';
                         delete activeSessions[userKey];
@@ -408,8 +406,7 @@
 
             tbody.innerHTML = '';
             
-            // Filter hanya tampilkan yang tanggal masuknya (IN_DATE) sesuai filter Bos
-            // Lalu balik urutan agar data terbaru di atas
+            // Filter hanya tampilkan yang tanggal masuknya sesuai filter Bos
             const finalRows = Object.values(groupedData)
                 .filter(item => !end || item.IN_DATE <= end)
                 .reverse();
@@ -420,7 +417,6 @@
                 finalRows.forEach(item => {
                     let durationStr = '-';
                     
-                    // KALKULASI PAKAI TIMESTAMP DATE_TIME
                     if (item.IN_DT && item.OUT_DT) {
                         const startDT = new Date(item.IN_DT);
                         const endDT = new Date(item.OUT_DT);
@@ -431,6 +427,7 @@
                             const totalMin = Math.floor(diffMs / 60000);
                             const hrs = Math.floor(totalMin / 60);
                             const mins = totalMin % 60;
+                            // Real Time Format: HH:mm
                             durationStr = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
                         } else {
                             durationStr = "00:00";
