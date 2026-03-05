@@ -339,22 +339,32 @@
         
         btn.innerText = "⏳ Loading...";
         btn.classList.add('btn-loading');
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Mensinkronisasi data absensi...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">⌛ Mensinkronisasi data dengan kolom DATE_TIME...</td></tr>';
 
         try {
             let query = _supabase.from('TH_ATTN01').select('*');
+            
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             const id = document.getElementById('emplId').value;
             const eNm = document.getElementById('emplNm').value;
 
+            // Filter tetap pakai TRAN_DATE agar sesuai input user
             if (start) query = query.gte('TRAN_DATE', start);
-            if (end) query = query.lte('TRAN_DATE', end);
+            
+            // Tambahkan jangkauan +1 hari di query agar Check Out subuh besoknya ketarik
+            if (end) {
+                let nextDay = new Date(end);
+                nextDay.setDate(nextDay.getDate() + 1);
+                const endExtended = nextDay.toISOString().split('T')[0];
+                query = query.lte('TRAN_DATE', endExtended);
+            }
+
             if (id) query = query.ilike('EMPL_NMBR', `%${id}%`);
             if (eNm) query = query.ilike('KORX_NAME', `%${eNm}%`);
 
-            // Tarik data dari yang terlama ke terbaru (ASC) untuk pairing logic
-            query = query.order('TRAN_DATE', { ascending: true }).order('TRAN_TIME', { ascending: true });            
+            // Urutkan berdasarkan DATE_TIME agar kronologisnya sempurna
+            query = query.order('DATE_TIME', { ascending: true });            
             
             const { data, error } = await query;
             if (error) throw error;
@@ -367,15 +377,16 @@
                 const userKey = row.EMPL_NMBR;
 
                 if (status === 'check in') {
-                    // Pakai ID + Date + Time sebagai key unik session In
-                    const sessionKey = `${userKey}_${row.TRAN_DATE}_${row.TRAN_TIME}`;
+                    // Gunakan DATE_TIME sebagai ID unik sesi masuk
+                    const sessionKey = `${userKey}_${row.DATE_TIME}`;
                     groupedData[sessionKey] = {
                         EMPL_NMBR: row.EMPL_NMBR,
                         KORX_NAME: row.KORX_NAME,
                         IN_DATE: row.TRAN_DATE,
                         IN_TIME: row.TRAN_TIME,
-                        OUT_DATE: '-',
+                        IN_DT: row.DATE_TIME, // Simpan timestamp masuk
                         OUT_TIME: '-',
+                        OUT_DT: null,         // Tempat simpan timestamp keluar
                         AREA_IN: row.LOCT_AREA || '-',
                         AREA_OUT: '-',
                         IMG_IN: row.IMGE_URLX || '',
@@ -386,8 +397,8 @@
                 } else if (status === 'check out') {
                     const openKey = activeSessions[userKey];
                     if (openKey && groupedData[openKey]) {
-                        groupedData[openKey].OUT_DATE = row.TRAN_DATE;
                         groupedData[openKey].OUT_TIME = row.TRAN_TIME;
+                        groupedData[openKey].OUT_DT = row.DATE_TIME; // Ambil timestamp keluar
                         groupedData[openKey].AREA_OUT = row.LOCT_AREA || '-';
                         groupedData[openKey].IMG_OUT = row.IMGE_URLX || '';
                         delete activeSessions[userKey];
@@ -396,8 +407,12 @@
             });
 
             tbody.innerHTML = '';
-            // Tampilkan data terbaru di atas
-            const finalRows = Object.values(groupedData).reverse();
+            
+            // Filter hanya tampilkan yang tanggal masuknya (IN_DATE) sesuai filter Bos
+            // Lalu balik urutan agar data terbaru di atas
+            const finalRows = Object.values(groupedData)
+                .filter(item => !end || item.IN_DATE <= end)
+                .reverse();
 
             if (finalRows.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Data tidak ditemukan.</td></tr>';
@@ -405,33 +420,20 @@
                 finalRows.forEach(item => {
                     let durationStr = '-';
                     
-                    if (item.IN_TIME !== '-' && item.OUT_TIME !== '-') {
-                        // LOGIKA MANUAL MINUTES (Paling aman untuk kolom Date & Time terpisah)
-                        const pIn = item.IN_TIME.split(':');
-                        const pOut = item.OUT_TIME.split(':');
+                    // KALKULASI PAKAI TIMESTAMP DATE_TIME
+                    if (item.IN_DT && item.OUT_DT) {
+                        const startDT = new Date(item.IN_DT);
+                        const endDT = new Date(item.OUT_DT);
                         
-                        // Konversi jam & menit ke total menit
-                        let minIn = (parseInt(pIn[0]) * 60) + parseInt(pIn[1]);
-                        let minOut = (parseInt(pOut[0]) * 60) + parseInt(pOut[1]);
+                        const diffMs = endDT - startDT;
 
-                        // HITUNG SELISIH HARI
-                        const dIn = new Date(item.IN_DATE);
-                        const dOut = new Date(item.OUT_DATE);
-                        const dayDiff = Math.round((dOut - dIn) / (1000 * 60 * 60 * 24));
-
-                        // Jika beda hari (misal shift malam), tambahkan 1440 menit (24 jam) per hari
-                        if (dayDiff > 0) {
-                            minOut += (dayDiff * 1440);
-                        }
-
-                        const totalDiff = minOut - minIn;
-
-                        if (totalDiff >= 0) {
-                            const hrs = Math.floor(totalDiff / 60);
-                            const mins = totalDiff % 60;
+                        if (diffMs > 0) {
+                            const totalMin = Math.floor(diffMs / 60000);
+                            const hrs = Math.floor(totalMin / 60);
+                            const mins = totalMin % 60;
                             durationStr = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
                         } else {
-                            durationStr = "Err: Time";
+                            durationStr = "00:00";
                         }
                     }
 
@@ -452,7 +454,7 @@
                 });
             }
         } catch (err) {
-            console.error("Detail Error:", err);
+            console.error("Error Trace:", err);
             alert("⛔ Bos, ada masalah: " + err.message);
         } finally {
             btn.innerText = "🔎 Search";
