@@ -353,37 +353,51 @@
             if (id) query = query.ilike('EMPL_NMBR', `%${id}%`);
             if (eNm) query = query.ilike('KORX_NAME', `%${eNm}%`);
 
-            query = query.order('TRAN_DATE', { ascending: false }).order('TRAN_TIME', { ascending: false });            
+            // Urutkan berdasarkan waktu terkecil ke terbesar agar Check In ditemukan lebih dulu
+            query = query.order('TRAN_DATE', { ascending: true }).order('TRAN_TIME', { ascending: true });            
             const { data, error } = await query;
             if (error) throw error;
 
             const groupedData = {};
             data.forEach(row => {
-                const key = `${row.EMPL_NMBR}_${row.TRAN_DATE}`;
-                if (!groupedData[key]) {
-                    groupedData[key] = {
+                const status = (row.TRAN_STAT || "").toLowerCase();
+                
+                // Gunakan Key yang unik per sesi (Karyawan + Tanggal Check In)
+                // Jika ini Check In, kita buat row baru. Jika Check Out, kita cari row Check In terakhir karyawan tersebut.
+                const userKey = row.EMPL_NMBR;
+
+                if (status === 'check in') {
+                    const sessionKey = `${userKey}_${row.TRAN_DATE}`;
+                    groupedData[sessionKey] = {
                         EMPL_NMBR: row.EMPL_NMBR,
                         KORX_NAME: row.KORX_NAME,
-                        TRAN_DATE: row.TRAN_DATE,
-                        IN_TIME: '-', OUT_TIME: '-',
-                        AREA_IN: '-', AREA_OUT: '-',
-                        IMG_IN: '', IMG_OUT: ''
+                        IN_DATE: row.TRAN_DATE, // Simpan tanggal masuk
+                        IN_TIME: row.TRAN_TIME,
+                        OUT_DATE: '-',
+                        OUT_TIME: '-',
+                        AREA_IN: row.LOCT_AREA,
+                        AREA_OUT: '-',
+                        IMG_IN: row.IMGE_URLX,
+                        IMG_OUT: ''
                     };
-                }
-                const status = (row.TRAN_STAT || "").toLowerCase();
-                if (status === 'check in') {
-                    groupedData[key].IN_TIME = row.TRAN_TIME;
-                    groupedData[key].AREA_IN = row.LOCT_AREA;
-                    groupedData[key].IMG_IN = row.IMGE_URLX;
                 } else if (status === 'check out') {
-                    groupedData[key].OUT_TIME = row.TRAN_TIME;
-                    groupedData[key].AREA_OUT = row.LOCT_AREA;
-                    groupedData[key].IMG_OUT = row.IMGE_URLX;
+                    // Cari session check-in milik karyawan ini yang belum ada check-out-nya
+                    const openSession = Object.keys(groupedData)
+                        .reverse()
+                        .find(k => k.startsWith(userKey) && groupedData[k].OUT_TIME === '-');
+                    
+                    if (openSession) {
+                        groupedData[openSession].OUT_DATE = row.TRAN_DATE; // Simpan tanggal keluar
+                        groupedData[openSession].OUT_TIME = row.TRAN_TIME;
+                        groupedData[openSession].AREA_OUT = row.LOCT_AREA;
+                        groupedData[openSession].IMG_OUT = row.IMGE_URLX;
+                    }
                 }
             });
 
             tbody.innerHTML = '';
-            const finalRows = Object.values(groupedData);
+            // Urutkan lagi ke descending (terbaru di atas) untuk tampilan table
+            const finalRows = Object.values(groupedData).reverse();
 
             if (finalRows.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Data tidak ditemukan.</td></tr>';
@@ -392,14 +406,20 @@
                     let durationStr = '-';
                     if (item.IN_TIME !== '-' && item.OUT_TIME !== '-') {
                         try {
-                            const pIn = item.IN_TIME.split(':');
-                            const pOut = item.OUT_TIME.split(':');
-                            const mIn = (parseInt(pIn[0]) * 60) + parseInt(pIn[1]);
-                            const mOut = (parseInt(pOut[0]) * 60) + parseInt(pOut[1]);
-                            const diff = mOut - mIn;
-                            if (diff >= 0) {
-                                durationStr = `${String(Math.floor(diff/60)).padStart(2,'0')}:${String(diff%60).padStart(2,'0')}`;
-                            } else { durationStr = "Err: Out<In"; }
+                            // LOGIKA UPDATE: Menggunakan Full Date Object untuk hitung lintas hari
+                            const startDT = new Date(`${item.IN_DATE}T${item.IN_TIME}`);
+                            const endDT = new Date(`${item.OUT_DATE}T${item.OUT_TIME}`);
+                            
+                            const diffMs = endDT - startDT;
+                            
+                            if (diffMs >= 0) {
+                                const totalMinutes = Math.floor(diffMs / 60000);
+                                const hrs = Math.floor(totalMinutes / 60);
+                                const mins = totalMinutes % 60;
+                                durationStr = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;
+                            } else { 
+                                durationStr = "Err: Out<In"; 
+                            }
                         } catch(e) { durationStr = "Error"; }
                     }
 
@@ -407,7 +427,7 @@
                         <tr>
                             <td>${item.EMPL_NMBR}</td>
                             <td>${item.KORX_NAME}</td>
-                            <td>${item.TRAN_DATE}</td>
+                            <td>${item.IN_DATE}</td>
                             <td class="status-in">${item.IN_TIME}</td>
                             <td class="status-out">${item.OUT_TIME}</td>
                             <td class="duration-cell">${durationStr}</td>
